@@ -8,17 +8,19 @@
       margin: 0;
       font-family: monospace;
       background-color: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
 
     #livePreview {
-      position: sticky;
-      top: 0;
+      position: relative;
       width: 100%;
-      height: 800px;
+      height: 300px;
       border: none;
       background: white;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      z-index: 1000;
+      margin-bottom: 10px;
     }
 
     #codeBox {
@@ -104,14 +106,173 @@
 
       const iframeDoc = livePreview.contentDocument || livePreview.contentWindow.document;
       iframeDoc.open();
-      iframeDoc.write(`<!DOCTYPE html><html><head></head><body></body></html>`);
+      iframeDoc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body></body></html>`);
       iframeDoc.close();
 
-      let styleInjected = false;
-      let bodyInjected = false;
+      // Check if it's a complete HTML document or just a fragment
+      const isCompleteDocument = fullCode.includes('<!DOCTYPE html>') || 
+                                (fullCode.includes('<html') && fullCode.includes('<body'));
+
+      // PRE-ANALYZE CSS and categorize into stages
+      let finalHtml = '';
+      let finalCss = '';
+      let stage1Css = ''; // Basic layout (display, position, width, height, margin, padding, flex)
+      let stage2Css = ''; // Colors/effects (background, color, border, box-shadow, text-shadow)
+      let stage3Css = ''; // Animations/hover (transition, transform, animation, hover states)
+
+      if (isCompleteDocument) {
+        const bodyMatch = fullCode.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+        const styleMatch = fullCode.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
+        finalHtml = bodyMatch ? bodyMatch[1] : '';
+        finalCss = styleMatch ? styleMatch[1] : '';
+      } else {
+        const htmlContent = fullCode.match(/^[\s\S]*?(?=<style|$)/);
+        const styleContent = fullCode.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
+        finalHtml = htmlContent ? htmlContent[0].replace(/<style[\s\S]*?<\/style>/i, '').trim() : '';
+        finalCss = styleContent ? styleContent[1] : '';
+      }
+
+      // Categorize CSS properties into stages
+      function categorizeCSS(cssText) {
+        const stage1Props = ['display', 'position', 'top', 'left', 'right', 'bottom', 'width', 'height', 'max-width', 'min-width', 'max-height', 'min-height', 'margin', 'padding', 'flex', 'flex-direction', 'justify-content', 'align-items', 'grid', 'float', 'clear', 'overflow', 'z-index'];
+        const stage2Props = ['background', 'background-color', 'background-image', 'background-size', 'background-position', 'color', 'border', 'border-radius', 'box-shadow', 'text-shadow', 'font-size', 'font-family', 'font-weight', 'text-align', 'opacity'];
+        const stage3Props = ['transition', 'transform', 'animation', ':hover', ':before', ':after', 'cursor'];
+
+        let stage1 = '';
+        let stage2 = '';
+        let stage3 = '';
+
+        // Parse CSS rules
+        const rules = cssText.match(/[^{}]+\{[^{}]*\}/g) || [];
+        
+        rules.forEach(rule => {
+          const selectorMatch = rule.match(/([^{]+)\{([^}]*)\}/);
+          if (selectorMatch) {
+            const selector = selectorMatch[1].trim();
+            const properties = selectorMatch[2];
+            
+            // Check if it's a hover or pseudo-element (stage 3)
+            if (selector.includes(':hover') || selector.includes(':before') || selector.includes(':after')) {
+              stage3 += rule + '\n';
+              return;
+            }
+
+            // Categorize properties within this rule
+            let stage1PropsForRule = [];
+            let stage2PropsForRule = [];
+            let stage3PropsForRule = [];
+
+            const propDeclarations = properties.split(';').filter(p => p.trim());
+            propDeclarations.forEach(prop => {
+              const propName = prop.split(':')[0].trim();
+              const found1 = stage1Props.some(p => propName.startsWith(p));
+              const found3 = stage3Props.some(p => propName.startsWith(p));
+              
+              if (found1) {
+                stage1PropsForRule.push(prop.trim());
+              } else if (found3) {
+                stage3PropsForRule.push(prop.trim());
+              } else {
+                stage2PropsForRule.push(prop.trim());
+              }
+            });
+
+            // Create separate rules for each stage
+            if (stage1PropsForRule.length > 0) {
+              stage1 += `${selector} { ${stage1PropsForRule.join('; ')}; }\n`;
+            }
+            if (stage2PropsForRule.length > 0) {
+              stage2 += `${selector} { ${stage2PropsForRule.join('; ')}; }\n`;
+            }
+            if (stage3PropsForRule.length > 0) {
+              stage3 += `${selector} { ${stage3PropsForRule.join('; ')}; }\n`;
+            }
+          }
+        });
+
+        return { stage1, stage2, stage3 };
+      }
+
+      const cssStages = categorizeCSS(finalCss);
+      stage1Css = cssStages.stage1;
+      stage2Css = cssStages.stage2;
+      stage3Css = cssStages.stage3;
+
+      // Create style elements for each stage
+      const stage1Style = iframeDoc.createElement('style');
+      stage1Style.id = 'stage1-layout';
+      iframeDoc.head.appendChild(stage1Style);
+
+      const stage2Style = iframeDoc.createElement('style');
+      stage2Style.id = 'stage2-colors';
+      iframeDoc.head.appendChild(stage2Style);
+
+      const stage3Style = iframeDoc.createElement('style');
+      stage3Style.id = 'stage3-effects';
+      iframeDoc.head.appendChild(stage3Style);
+
+      // Pre-load HTML (Stage 1: Reveal HTML structure)
+      if (finalHtml) {
+        iframeDoc.body.innerHTML = finalHtml;
+      }
+
+      let htmlRevealed = false;
+      let layoutApplied = false;
+      let colorsApplied = false;
+      let effectsApplied = false;
+
+      function updatePreview() {
+        const codeLength = fullCode.length;
+        const currentLength = currentCode.length;
+        const progress = currentLength / codeLength;
+
+        // Stage 1: Reveal HTML structure (20% progress)
+        if (!htmlRevealed && progress >= 0.20) {
+          htmlRevealed = true;
+          console.log('Stage 1: HTML Structure Revealed');
+        }
+
+        // Stage 2: Apply basic layout CSS (40% progress)
+        if (!layoutApplied && progress >= 0.40) {
+          layoutApplied = true;
+          stage1Style.textContent = stage1Css;
+          console.log('Stage 2: Basic Layout Applied');
+        }
+
+        // Stage 3: Apply colors/effects (70% progress)
+        if (!colorsApplied && progress >= 0.70) {
+          colorsApplied = true;
+          stage2Style.textContent = stage2Css;
+          console.log('Stage 3: Colors/Effects Applied');
+        }
+
+        // Stage 4: Apply animations/hover effects (90% progress)
+        if (!effectsApplied && progress >= 0.90) {
+          effectsApplied = true;
+          stage3Style.textContent = stage3Css;
+          console.log('Stage 4: Animations/Hover Effects Applied');
+        }
+
+        // Handle JavaScript execution
+        const scriptMatches = currentCode.match(/<script[^>]*>([\s\S]*?)<\/script>/gi);
+        if (scriptMatches) {
+          const existingScripts = iframeDoc.querySelectorAll('script[data-typed="true"]');
+          existingScripts.forEach(script => script.remove());
+          
+          scriptMatches.forEach(scriptTag => {
+            const content = scriptTag.match(/<script[^>]*>([\s\S]*?)<\/script>/i);
+            if (content && content[1]) {
+              const newScript = iframeDoc.createElement('script');
+              newScript.setAttribute('data-typed', 'true');
+              newScript.textContent = content[1];
+              iframeDoc.body.appendChild(newScript);
+            }
+          });
+        }
+      }
 
       function typeNextChar() {
-        if (i <= fullCode.length) {
+        if (i < fullCode.length) {
           const char = fullCode[i] || '';
           currentCode += char;
           i++;
@@ -131,33 +292,27 @@
             codeBox.scrollTop = codeBox.scrollHeight;
           }, 0);
 
-          const styleMatch = currentCode.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
-          if (styleMatch && !styleInjected) {
-            const styleTag = iframeDoc.createElement('style');
-            styleTag.textContent = styleMatch[1];
-            iframeDoc.head.appendChild(styleTag);
-            styleInjected = true;
-          }
-
-          const bodyMatch = currentCode.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-          if (bodyMatch && !bodyInjected) {
-            iframeDoc.body.innerHTML = bodyMatch[1];
-            bodyInjected = true;
-          }
-
-          const scriptMatches = currentCode.match(/<script[^>]*>([\s\S]*?)<\/script>/gi);
-          if (scriptMatches) {
-            scriptMatches.forEach(scriptTag => {
-              const content = scriptTag.match(/<script[^>]*>([\s\S]*?)<\/script>/i);
-              if (content && content[1]) {
-                const newScript = iframeDoc.createElement('script');
-                newScript.textContent = content[1];
-                iframeDoc.body.appendChild(newScript);
-              }
-            });
-          }
+          // Update preview with staging
+          updatePreview();
 
           setTimeout(typeNextChar, 10);
+        } else {
+          // Typing complete - ensure all stages are applied
+          if (!htmlRevealed) {
+            console.log('Final: HTML Structure Revealed');
+          }
+          if (!layoutApplied) {
+            stage1Style.textContent = stage1Css;
+            console.log('Final: Basic Layout Applied');
+          }
+          if (!colorsApplied) {
+            stage2Style.textContent = stage2Css;
+            console.log('Final: Colors/Effects Applied');
+          }
+          if (!effectsApplied) {
+            stage3Style.textContent = stage3Css;
+            console.log('Final: Animations/Hover Effects Applied');
+          }
         }
       }
 
