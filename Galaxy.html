@@ -1,6 +1,6 @@
  <div class="experience"></div>
 
-
+<style>
 *
 {
     margin: 0;
@@ -35,8 +35,9 @@ body
 {
     color: inherit;
 }
+</style>
 
-
+<script>
 var lu=Object.defineProperty;var cu=(r,e,t)=>e in r?lu(r,e,{enumerable:!0,configurable:!0,writable:!0,value:t}):r[e]=t;var Xr=(r,e,t)=>(cu(r,typeof e!="symbol"?e+"":e,t),t);const hu=function(){const e=document.createElement("link").relList;if(e&&e.supports&&e.supports("modulepreload"))return;for(const i of document.querySelectorAll('link[rel="modulepreload"]'))n(i);new MutationObserver(i=>{for(const s of i)if(s.type==="childList")for(const a of s.addedNodes)a.tagName==="LINK"&&a.rel==="modulepreload"&&n(a)}).observe(document,{childList:!0,subtree:!0});function t(i){const s={};return i.integrity&&(s.integrity=i.integrity),i.referrerpolicy&&(s.referrerPolicy=i.referrerpolicy),i.crossorigin==="use-credentials"?s.credentials="include":i.crossorigin==="anonymous"?s.credentials="omit":s.credentials="same-origin",s}function n(i){if(i.ep)return;i.ep=!0;const s=t(i);fetch(i.href,s)}};hu();/**
  * @license
  * Copyright 2010-2022 Three.js Authors
@@ -4093,3 +4094,4 @@ void main()
     
 }`;function nx(){return new jn({glslVersion:Tn,depthWrite:!1,depthTest:!1,uniforms:{uViewHeight:{value:1024},uSize:{value:.001}},vertexShader:ex,fragmentShader:tx})}class ix{constructor(){this.experience=new Zt,this.config=this.experience.config,this.scenes=this.experience.scenes,this.time=this.experience.time,this.debug=this.experience.debug,this.sizes=this.experience.sizes,this.camera=this.experience.camera,this.renderer=this.experience.renderer,this.setParticles()}setParticles(){this.particles={},this.particles.count=5e4;const e=new Float32Array(this.particles.count*3),t=new Float32Array(this.particles.count),n=new Float32Array(this.particles.count*3);for(let i=0;i<this.particles.count;i++){const s=i*3,a=2*Math.PI*Math.random(),o=Math.acos(2*Math.random()-1),l=Math.cos(a)*Math.sin(o)*400,c=Math.sin(a)*Math.sin(o)*400,u=Math.cos(o)*400;e[s+0]=l,e[s+1]=c,e[s+2]=u,t[i]=Math.random();const h=new de(`hsl(${Math.round(360*Math.random())}, 100%, 80%)`);n[s+0]=h.r,n[s+1]=h.g,n[s+2]=h.b}this.particles.geometry=new ct,this.particles.geometry.setAttribute("position",new Xe(e,3)),this.particles.geometry.setAttribute("aSize",new Xe(t,1)),this.particles.geometry.setAttribute("aColor",new Xe(n,3)),this.particles.material=new nx,this.particles.material.uniforms.uViewHeight.value=this.renderer.composition.space.height,this.particles.points=new co(this.particles.geometry,this.particles.material),this.particles.points.frustumCulled=!1,this.scenes.space.add(this.particles.points)}resize(){this.particles.material.uniforms.uViewHeight.value=this.sizes.height}update(){}}class sx{constructor(e){this.experience=new Zt,this.config=this.experience.config,this.scenes=this.experience.scenes,this.resources=this.experience.resources,this.blackHole=new Q_,this.stars=new ix}resize(){this.blackHole&&this.blackHole.resize()}update(){this.blackHole&&this.blackHole.update()}destroy(){}}var rx=[{name:"base",data:{},items:[]}];const Ts=class{constructor(e={}){if(Ts.instance)return Ts.instance;if(Ts.instance=this,this.targetElement=e.targetElement,!this.targetElement){console.warn("Missing 'targetElement' property");return}this.time=new Y0,this.sizes=new K0,this.setConfig(),this.setDebug(),this.setScenes(),this.setCamera(),this.setRenderer(),this.setResources(),this.setWorld(),this.sizes.on("resize",()=>{this.resize()}),this.update()}setConfig(){this.config={},this.config.pixelRatio=Math.min(Math.max(window.devicePixelRatio,1),2);const e=this.targetElement.getBoundingClientRect();this.config.width=e.width,this.config.height=e.height||window.innerHeight}setDebug(){this.debug=new dv}setScenes(){this.scenes={},this.scenes.space=new ws,this.scenes.distortion=new ws,this.scenes.overlay=new ws}setCamera(){this.camera=new O_}setRenderer(){this.renderer=new N_({rendererInstance:this.rendererInstance}),this.targetElement.appendChild(this.renderer.instance.domElement)}setResources(){this.resources=new P_(rx)}setWorld(){this.world=new sx}update(){this.stats&&this.stats.update(),this.world&&this.world.update(),this.camera.update(),this.renderer&&this.renderer.update(),window.requestAnimationFrame(()=>{this.update()})}resize(){const e=this.targetElement.getBoundingClientRect();this.config.width=e.width,this.config.height=e.height,this.config.pixelRatio=Math.min(Math.max(window.devicePixelRatio,1),2),this.camera&&this.camera.resize(),this.renderer&&this.renderer.resize(),this.world&&this.world.resize()}destroy(){}};let Zt=Ts;Xr(Zt,"instance");new Zt({targetElement:document.querySelector(".experience")});
 //# sourceMappingURL=index.c2b8a264.js.map
+</script>
