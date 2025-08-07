@@ -7,37 +7,50 @@
     body {
       margin: 0;
       font-family: monospace;
-      background-color: #f5f5f5;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      padding: 10px;
+      box-sizing: border-box;
     }
 
     #livePreview {
       position: relative;
       width: 100%;
-      height: 300px;
+      height: 500px;
       border: none;
       background: white;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
       margin-bottom: 10px;
+      border-radius: 18px;
     }
 
     #codeBox {
       background: #1e1e1e;
       color: #d4d4d4;
-      padding: 20px;
+      padding: 15px;
       white-space: pre-wrap;
       overflow-y: auto;
       border-bottom: 2px solid #ccc;
-      height: 500px;
+      height: 300px;
       margin: 0;
       scroll-behavior: smooth;
+      border-radius: 18px;
+      font-size: 17px;
+      line-height: 1.4;
+      /* Hide scrollbar but keep functionality */
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    #codeBox::-webkit-scrollbar {
+      display: none;
     }
 
     .cursor {
       display: inline-block;
-      width: 10px;
+      width: 8px;
       background: #d4d4d4;
       animation: blink 1s steps(1) infinite;
       vertical-align: bottom;
@@ -49,10 +62,20 @@
     }
 
     #inputArea {
-      padding: 20px;
-      background: #ffffff;
-      border-top: 1px solid #ccc;
-      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+      background: rgba(255,255,255,0.18);
+      border-radius: 18px;
+      box-shadow: 0 2px 18px rgba(0,0,0,0.13);
+      padding: 28px 28px 18px 28px;
+      margin-top: 10px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: white;
+      transition: box-shadow 0.2s;
+    }
+
+    #inputArea label {
+      color: white;
+      font-weight: bold;
     }
 
     #inputArea.hidden {
@@ -61,18 +84,75 @@
 
     textarea {
       width: 100%;
-      height: 150px;
+      height: 120px;
       font-family: monospace;
       padding: 10px;
-      font-size: 14px;
+      font-size: 12px;
       resize: vertical;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 12px;
+      box-sizing: border-box;
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
     }
 
     button {
       margin-top: 10px;
-      padding: 10px 16px;
+      padding: 12px 20px;
       font-size: 14px;
       cursor: pointer;
+      background: rgba(255,255,255,0.18);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 18px;
+      width: 100%;
+      box-shadow: 0 2px 18px rgba(0,0,0,0.13);
+      transition: box-shadow 0.2s, transform 0.2s;
+      font-weight: bold;
+    }
+
+    button:hover {
+      box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+      transform: translateY(-1px);
+    }
+
+    /* Mobile optimizations */
+    @media (max-width: 480px) {
+      body {
+        padding: 5px;
+      }
+      
+      #livePreview {
+        height: 65vh;
+        border-radius: 12px;
+      }
+      
+      #codeBox {
+        height: 20vh;
+        font-size: 24px;
+        padding: 10px;
+        border-radius: 12px;
+      }
+      
+      #inputArea {
+        padding: 20px;
+        border-radius: 12px;
+      }
+      
+      textarea {
+        height: 100px;
+        font-size: 11px;
+        border-radius: 8px;
+      }
+      
+      button {
+        padding: 15px;
+        font-size: 16px;
+        border-radius: 12px;
+      }
     }
   </style>
 </head>
@@ -94,6 +174,7 @@
     const livePreview = document.getElementById("livePreview");
 
     startBtn.addEventListener("click", () => {
+      console.log("Button clicked - starting typing");
       const fullCode = userCode.value;
       if (!fullCode) return;
 
@@ -214,43 +295,59 @@
       // Pre-load HTML (Stage 1: Reveal HTML structure)
       if (finalHtml) {
         iframeDoc.body.innerHTML = finalHtml;
+        
+        // NEW: Hide all elements initially
+        const allElements = iframeDoc.body.querySelectorAll('*');
+        allElements.forEach(el => {
+          el.style.opacity = '0';
+          el.style.transition = 'opacity 0.5s ease';
+        });
+        console.log(`Hidden ${allElements.length} elements initially`);
       }
 
       let htmlRevealed = false;
       let layoutApplied = false;
       let colorsApplied = false;
       let effectsApplied = false;
+      let elementRevealIndex = 0; // NEW: Track which element to reveal next
 
-      function updatePreview() {
-        const codeLength = fullCode.length;
-        const currentLength = currentCode.length;
-        const progress = currentLength / codeLength;
+      function updatePreview(justTypedChar) {
+        // NEW: Reveal next element when > is typed
+        if (justTypedChar === '>') {
+          const allElements = iframeDoc.body.querySelectorAll('*');
+          if (elementRevealIndex < allElements.length) {
+            const elementToReveal = allElements[elementRevealIndex];
+            elementToReveal.style.opacity = '1';
+            console.log(`Revealed element ${elementRevealIndex + 1}: ${elementToReveal.tagName}`);
+            elementRevealIndex++;
+          }
+        }
 
-        // Stage 1: Reveal HTML structure (20% progress)
-        if (!htmlRevealed && progress >= 0.20) {
+        // NEW: Apply CSS stages when } is typed
+        if (justTypedChar === '}') {
+          console.log('CSS rule completed with }');
+          const progress = currentCode.length / fullCode.length;
+
+          // Apply CSS stages progressively based on } characters
+          if (!layoutApplied) {
+            layoutApplied = true;
+            stage1Style.textContent = stage1Css;
+            console.log('Stage 2: Basic Layout Applied');
+          } else if (!colorsApplied) {
+            colorsApplied = true;
+            stage2Style.textContent = stage2Css;
+            console.log('Stage 3: Colors/Effects Applied');
+          } else if (!effectsApplied) {
+            effectsApplied = true;
+            stage3Style.textContent = stage3Css;
+            console.log('Stage 4: Animations/Hover Effects Applied');
+          }
+        }
+
+        // Ensure HTML structure is revealed when first > appears
+        if (justTypedChar === '>' && !htmlRevealed) {
           htmlRevealed = true;
           console.log('Stage 1: HTML Structure Revealed');
-        }
-
-        // Stage 2: Apply basic layout CSS (40% progress)
-        if (!layoutApplied && progress >= 0.40) {
-          layoutApplied = true;
-          stage1Style.textContent = stage1Css;
-          console.log('Stage 2: Basic Layout Applied');
-        }
-
-        // Stage 3: Apply colors/effects (70% progress)
-        if (!colorsApplied && progress >= 0.70) {
-          colorsApplied = true;
-          stage2Style.textContent = stage2Css;
-          console.log('Stage 3: Colors/Effects Applied');
-        }
-
-        // Stage 4: Apply animations/hover effects (90% progress)
-        if (!effectsApplied && progress >= 0.90) {
-          effectsApplied = true;
-          stage3Style.textContent = stage3Css;
-          console.log('Stage 4: Animations/Hover Effects Applied');
         }
 
         // Handle JavaScript execution
@@ -292,10 +389,10 @@
             codeBox.scrollTop = codeBox.scrollHeight;
           }, 0);
 
-          // Update preview with staging
-          updatePreview();
+          // Update preview - pass the character that was just typed
+          updatePreview(char);
 
-          setTimeout(typeNextChar, 10);
+          setTimeout(typeNextChar, 1);
         } else {
           // Typing complete - ensure all stages are applied
           if (!htmlRevealed) {
