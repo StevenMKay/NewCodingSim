@@ -51,7 +51,7 @@
     .ui-panel:hover {
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(180,180,220,0.09) inset;
     }
-    #controls { bottom: 20px; right: 20px; }
+    #controls { bottom: 20px; right: 20px; display: none; }
     #autoRotateToggle {
         cursor: pointer; padding: 8px 5px; display: flex; align-items: center;
         gap: 8px; color: inherit; font-size: inherit; transition: color 0.2s ease;
@@ -320,11 +320,11 @@
     const diskMaterial = new THREE.ShaderMaterial({
         uniforms: {
             uTime: { value: 0.0 },
-            uColorHot: { value: new THREE.Color(0xffffff) },
-            uColorMid1: { value: new THREE.Color(0xff7733) },
-            uColorMid2: { value: new THREE.Color(0xff4477) },
-            uColorMid3: { value: new THREE.Color(0x7744ff) },
-            uColorOuter: { value: new THREE.Color(0x4477ff) },
+            uColorHot: { value: new THREE.Color(0xffaa44) },
+            uColorMid1: { value: new THREE.Color(0xff8822) },
+            uColorMid2: { value: new THREE.Color(0xff6611) },
+            uColorMid3: { value: new THREE.Color(0xdd4400) },
+            uColorOuter: { value: new THREE.Color(0xaa3300) },
             uNoiseScale: { value: 2.5 },
             uFlowSpeed: { value: 0.22 },
             uDensity: { value: 1.3 }
