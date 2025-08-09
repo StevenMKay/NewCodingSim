@@ -11,7 +11,7 @@
             background: #000;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: top;
             min-height: 100vh;
             font-family: 'Courier New', monospace;
             overflow: hidden;
@@ -20,16 +20,21 @@
         #gameContainer {
             position: relative;
             width: 800px;
-            height: 500px;
-            border: 2px solid #4ade80;
+            height: 900px;
+            border: 3px solid #4ade80;
             box-shadow: 
-                0 0 20px rgba(74, 222, 128, 0.5),
+                0 0 30px rgba(74, 222, 128, 0.6),
                 inset 0 0 20px rgba(74, 222, 128, 0.1);
+            background: linear-gradient(180deg, #0a0a0a 0%, #1a0033 70%, #000022 100%);
+            overflow: hidden;
+align: top
         }
 
         #gameCanvas {
-            background: radial-gradient(ellipse at center, #0f1419 0%, #000 70%);
             display: block;
+            background: transparent;
+            border: none;
+height: 900px;
         }
 
         #ui {
@@ -107,11 +112,24 @@
         }
 
         #gameOverScreen, #victoryScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #ff4444;
+            z-index: 20;
         }
 
         #victoryScreen {
-            background: linear-gradient(45deg, rgba(74, 222, 128, 0.2), rgba(34, 197, 94, 0.3));
+            background: linear-gradient(45deg, rgba(0, 0, 0, 0.85), rgba(26, 0, 51, 0.8));
+            backdrop-filter: blur(8px);
+            color: #4ade80;
+            z-index: 30;
         }
 
         .victory-title {
@@ -148,24 +166,22 @@
 
         .timer-option {
             padding: 10px 20px;
-            border: 2px solid #4ade80;
-            background: rgba(74, 222, 128, 0.1);
-            color: #4ade80;
+            border: 2px solid #00ffff;
+            background: rgba(0, 255, 255, 0.1);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
             font-weight: bold;
-            text-shadow: 0 0 5px rgba(74, 222, 128, 0.5);
-        }
-
-        .timer-option:hover {
-            background: rgba(74, 222, 128, 0.2);
-            box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
         }
 
         .timer-option.selected {
-            background: rgba(74, 222, 128, 0.3);
-            box-shadow: 0 0 15px rgba(74, 222, 128, 0.8);
-            color: #ffffff;
+            background: rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            transform: scale(1.1);
+        }
+
+        .timer-option:hover {
+            background: rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
         }
     </style>
 </head>
@@ -220,9 +236,6 @@
             <div class="victory-title">🧘 PEACE OF MIND 🧘</div>
             <div class="subtitle">You have found inner peace and balance<br>Hope Generated: <span id="victoryScore">0</span><br><br>You've learned that with focus, support, and positive habits,<br>you can overcome any mental challenge.</div>
             <div class="controls">Press SPACEBAR to Return to Main Menu</div>
-            
-            <!-- Heaven-like clouds background -->
-            <canvas id="heavenCanvas" width="800" height="600" style="position: absolute; top: 0; left: 0; z-index: -1; opacity: 0.8;"></canvas>
         </div>
     </div>
 
@@ -297,6 +310,7 @@
                 this.initializeClouds();
                 this.setupEventListeners();
                 this.createPlayer();
+                this.updateTimerDisplay(); // Set initial timer selection
                 this.gameLoop();
             },
 
@@ -357,6 +371,8 @@
                             this.restartGame();
                         } else if (this.gameState === 'victory') {
                             this.restartGame(); // Return to main menu after victory
+                        } else if (this.gameState === 'playing') {
+                            this.createFocusBeam(); // Changed from slashAttack to createFocusBeam
                         }
                     }
                     
@@ -375,6 +391,35 @@
                 document.addEventListener('keyup', (e) => {
                     this.keys[e.code] = false;
                 });
+            },
+
+            selectPreviousTimer: function() {
+                const options = [1, 3, 5];
+                const currentIndex = options.indexOf(this.selectedTime);
+                const newIndex = (currentIndex - 1 + options.length) % options.length;
+                this.selectedTime = options[newIndex];
+                this.updateTimerDisplay();
+            },
+
+            selectNextTimer: function() {
+                const options = [1, 3, 5];
+                const currentIndex = options.indexOf(this.selectedTime);
+                const newIndex = (currentIndex + 1) % options.length;
+                this.selectedTime = options[newIndex];
+                this.updateTimerDisplay();
+            },
+
+            updateTimerDisplay: function() {
+                // Remove selected class from all options
+                document.querySelectorAll('.timer-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                
+                // Add selected class to current option
+                const selectedElement = document.getElementById('timer' + this.selectedTime);
+                if (selectedElement) {
+                    selectedElement.classList.add('selected');
+                }
             },
 
             selectPreviousTimer: function() {
@@ -417,7 +462,9 @@
                     baseBeamSize: 4,
                     speedBoostTime: 0,
                     beamBoostTime: 0,
-                    facing: 1, // 1 = right, -1 = left
+                    facing: 'right', // 'up', 'down', 'left', 'right'
+                    powerupMessage: '',
+                    powerupMessageTime: 0,
                     invulnerable: 0 // invulnerability timer
                 };
             },
@@ -456,7 +503,12 @@
                 this.gameState = 'victory';
                 document.getElementById('victoryScore').textContent = this.score;
                 document.getElementById('victoryScreen').style.display = 'flex';
-                this.drawHeavenScene();
+                
+                // Clear all game objects for a clean background
+                this.negativeThoughts = [];
+                this.focusBeams = [];
+                this.lightningFlashes = [];
+                if (this.boss) this.boss.health = 0;
             },
 
             gameOver: function() {
@@ -546,20 +598,30 @@
                     }
                 }
                 
-                // Movement
+                // Update powerup message timer
+                if (this.player.powerupMessageTime > 0) {
+                    this.player.powerupMessageTime -= deltaTime;
+                    if (this.player.powerupMessageTime <= 0) {
+                        this.player.powerupMessage = '';
+                    }
+                }
+                
+                // Movement with dynamic facing
                 if (this.keys['ArrowLeft'] && this.player.x > 10) {
                     this.player.x -= this.player.speed * deltaTime;
-                    this.player.facing = -1;
+                    this.player.facing = 'left';
                 }
                 if (this.keys['ArrowRight'] && this.player.x < this.width - this.player.width - 10) {
                     this.player.x += this.player.speed * deltaTime;
-                    this.player.facing = 1;
+                    this.player.facing = 'right';
                 }
                 if (this.keys['ArrowUp'] && this.player.y > 10) {
                     this.player.y -= this.player.speed * deltaTime;
+                    this.player.facing = 'up';
                 }
                 if (this.keys['ArrowDown'] && this.player.y < this.height - this.player.height - 10) {
                     this.player.y += this.player.speed * deltaTime;
+                    this.player.facing = 'down';
                 }
 
                 // Focus beam shooting
@@ -570,10 +632,10 @@
             },
 
             createFocusBeam: function() {
-                // Calculate shooting angle based on pressed keys
-                let angle = this.player.facing === 1 ? 0 : Math.PI; // Default horizontal shooting
+                // Calculate shooting angle based on pressed keys or facing direction
+                let angle = 0;
                 
-                // Check for diagonal shooting with arrow keys
+                // Check for diagonal shooting with arrow keys (priority)
                 if (this.keys['ArrowUp'] && this.keys['ArrowRight']) {
                     angle = -Math.PI / 4; // Up-right
                 } else if (this.keys['ArrowUp'] && this.keys['ArrowLeft']) {
@@ -590,6 +652,14 @@
                     angle = Math.PI; // Left
                 } else if (this.keys['ArrowRight']) {
                     angle = 0; // Right
+                } else {
+                    // If no keys pressed, shoot in facing direction
+                    switch(this.player.facing) {
+                        case 'up': angle = -Math.PI / 2; break;
+                        case 'down': angle = Math.PI / 2; break;
+                        case 'left': angle = Math.PI; break;
+                        case 'right': angle = 0; break;
+                    }
                 }
                 
                 this.focusBeams.push({
@@ -877,9 +947,13 @@
                 if (powerup.type === 'speed') {
                     this.player.speed = this.player.baseSpeed * 1.6;
                     this.player.speedBoostTime = 10;
+                    this.player.powerupMessage = '⚡ Speed Boost!';
+                    this.player.powerupMessageTime = 2.5;
                 } else if (powerup.type === 'beam') {
                     this.player.beamSize = this.player.baseBeamSize * 2;
                     this.player.beamBoostTime = 12;
+                    this.player.powerupMessage = '🎯 Beam Enhancement!';
+                    this.player.powerupMessageTime = 2.5;
                 }
             },
 
@@ -1191,43 +1265,97 @@
                 this.ctx.shadowColor = '#4ade80';
                 this.ctx.shadowBlur = player.invulnerable > 0 ? 20 : 10;
                 
-                // Draw pointy ship shape
+                // Draw pointy ship shape based on facing direction
                 this.ctx.fillStyle = player.invulnerable > 0 ? '#ffffff' : '#4ade80';
                 this.ctx.beginPath();
                 
-                if (player.facing === 1) {
-                    // Facing right - pointy ship
-                    this.ctx.moveTo(player.x + player.width, player.y + player.height / 2); // Point (nose)
-                    this.ctx.lineTo(player.x, player.y); // Top left
-                    this.ctx.lineTo(player.x + 5, player.y + player.height / 2); // Middle left
-                    this.ctx.lineTo(player.x, player.y + player.height); // Bottom left
-                    this.ctx.closePath();
-                } else {
-                    // Facing left - pointy ship
-                    this.ctx.moveTo(player.x, player.y + player.height / 2); // Point (nose)
-                    this.ctx.lineTo(player.x + player.width, player.y); // Top right
-                    this.ctx.lineTo(player.x + player.width - 5, player.y + player.height / 2); // Middle right
-                    this.ctx.lineTo(player.x + player.width, player.y + player.height); // Bottom right
-                    this.ctx.closePath();
+                const centerX = player.x + player.width / 2;
+                const centerY = player.y + player.height / 2;
+                const halfWidth = player.width / 2;
+                const halfHeight = player.height / 2;
+                
+                switch(player.facing) {
+                    case 'up':
+                        // Point up - triangle pointing up
+                        this.ctx.moveTo(centerX, player.y); // Top point
+                        this.ctx.lineTo(player.x, player.y + player.height); // Bottom left
+                        this.ctx.lineTo(centerX, player.y + halfHeight); // Middle
+                        this.ctx.lineTo(player.x + player.width, player.y + player.height); // Bottom right
+                        this.ctx.closePath();
+                        break;
+                    case 'down':
+                        // Point down - triangle pointing down
+                        this.ctx.moveTo(centerX, player.y + player.height); // Bottom point
+                        this.ctx.lineTo(player.x, player.y); // Top left
+                        this.ctx.lineTo(centerX, player.y + halfHeight); // Middle
+                        this.ctx.lineTo(player.x + player.width, player.y); // Top right
+                        this.ctx.closePath();
+                        break;
+                    case 'left':
+                        // Point left - triangle pointing left
+                        this.ctx.moveTo(player.x, centerY); // Left point
+                        this.ctx.lineTo(player.x + player.width, player.y); // Top right
+                        this.ctx.lineTo(player.x + halfWidth, centerY); // Middle
+                        this.ctx.lineTo(player.x + player.width, player.y + player.height); // Bottom right
+                        this.ctx.closePath();
+                        break;
+                    case 'right':
+                    default:
+                        // Point right - triangle pointing right
+                        this.ctx.moveTo(player.x + player.width, centerY); // Right point
+                        this.ctx.lineTo(player.x, player.y); // Top left
+                        this.ctx.lineTo(player.x + halfWidth, centerY); // Middle
+                        this.ctx.lineTo(player.x, player.y + player.height); // Bottom left
+                        this.ctx.closePath();
+                        break;
                 }
                 
                 this.ctx.fill();
                 
-                // Add engine glow at the back
+                // Add engine glow at the back based on facing direction
                 this.ctx.fillStyle = player.invulnerable > 0 ? '#88ffff' : '#00ff88';
-                if (player.facing === 1) {
-                    // Engine at the left (back) when facing right
-                    this.ctx.beginPath();
-                    this.ctx.arc(player.x - 2, player.y + player.height / 2, 4, 0, Math.PI * 2);
-                    this.ctx.fill();
-                } else {
-                    // Engine at the right (back) when facing left
-                    this.ctx.beginPath();
-                    this.ctx.arc(player.x + player.width + 2, player.y + player.height / 2, 4, 0, Math.PI * 2);
-                    this.ctx.fill();
+                this.ctx.beginPath();
+                
+                switch(player.facing) {
+                    case 'up':
+                        this.ctx.arc(centerX, player.y + player.height + 2, 4, 0, Math.PI * 2);
+                        break;
+                    case 'down':
+                        this.ctx.arc(centerX, player.y - 2, 4, 0, Math.PI * 2);
+                        break;
+                    case 'left':
+                        this.ctx.arc(player.x + player.width + 2, centerY, 4, 0, Math.PI * 2);
+                        break;
+                    case 'right':
+                    default:
+                        this.ctx.arc(player.x - 2, centerY, 4, 0, Math.PI * 2);
+                        break;
                 }
                 
+                this.ctx.fill();
                 this.ctx.shadowBlur = 0;
+                
+                // Draw powerup message above the ship
+                if (player.powerupMessage && player.powerupMessageTime > 0) {
+                    this.ctx.font = 'bold 14px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillStyle = '#ffff00';
+                    this.ctx.shadowColor = '#ffff00';
+                    this.ctx.shadowBlur = 8;
+                    
+                    // Floating effect - message bobs up and down
+                    const bobOffset = Math.sin(Date.now() * 0.005) * 3;
+                    const alpha = Math.min(player.powerupMessageTime / 0.5, 1); // Fade out in last 0.5 seconds
+                    
+                    this.ctx.globalAlpha = alpha;
+                    this.ctx.fillText(
+                        player.powerupMessage,
+                        centerX,
+                        player.y - 10 + bobOffset
+                    );
+                    this.ctx.globalAlpha = 1;
+                    this.ctx.shadowBlur = 0;
+                }
             },
 
             drawFocusBeam: function(beam) {
@@ -1456,6 +1584,8 @@
                 
                 ctx.shadowBlur = 0;
             },
+
+            gameLoop: function() {
                 const currentTime = performance.now();
                 const deltaTime = Math.min((currentTime - this.lastTime) / 1000, 0.016);
                 this.lastTime = currentTime;
