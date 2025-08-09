@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mind Over Matter</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            border: 2px solid #4ade80;
+            box-shadow: 
+                0 0 20px rgba(74, 222, 128, 0.5),
+                inset 0 0 20px rgba(74, 222, 128, 0.1);
+        }
+
+        #gameCanvas {
+            background: radial-gradient(ellipse at center, #0f1419 0%, #000 70%);
+            display: block;
+        }
+
+        #ui {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            color: #4ade80;
+            font-size: 18px;
+            font-weight: bold;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            text-shadow: 0 0 5px rgba(74, 222, 128, 0.8);
+        }
+
+        #startScreen, #gameOverScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #4ade80;
+            z-index: 20;
+        }
+
+        .title {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(74, 222, 128, 0.8);
+            animation: pulse 2s infinite;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            margin-bottom: 30px;
+            opacity: 0.8;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .controls {
+            font-size: 14px;
+            text-align: center;
+            line-height: 1.6;
+            opacity: 0.7;
+        }
+
+        .supportMessage {
+            position: absolute;
+            color: rgba(74, 222, 128, 0.7);
+            font-size: 14px;
+            font-weight: normal;
+            pointer-events: none;
+            animation: fadeInOut 4s ease-in-out;
+            text-shadow: 0 0 3px rgba(74, 222, 128, 0.5);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(20px); }
+            20% { opacity: 0.7; transform: translateY(0); }
+            80% { opacity: 0.7; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-20px); }
+        }
+
+        #gameOverScreen, #victoryScreen {
+            display: none;
+        }
+
+        #victoryScreen {
+            background: linear-gradient(45deg, rgba(74, 222, 128, 0.2), rgba(34, 197, 94, 0.3));
+        }
+
+        .victory-title {
+            font-size: 52px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            background: linear-gradient(45deg, #4ade80, #22c55e, #86efac);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(74, 222, 128, 0.5);
+            animation: victoryPulse 3s infinite;
+        }
+
+        @keyframes victoryPulse {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.08); filter: brightness(1.2); }
+        }
+
+        .powerup {
+            position: absolute;
+            color: rgba(34, 197, 94, 0.9);
+            font-size: 14px;
+            font-weight: bold;
+            pointer-events: none;
+            text-shadow: 0 0 8px rgba(34, 197, 94, 0.8);
+            animation: powerupPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes powerupPulse {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        
+        <div id="ui">
+            <div>
+                <span>Hope: <span id="score">0</span></span>
+                <span style="margin-left: 20px;">Strength: <span id="lives">3</span></span>
+            </div>
+            <div>
+                <span>Time: <span id="timer">5:00</span></span>
+                <span style="margin-left: 20px;">Thoughts: <span id="enemies">0</span></span>
+            </div>
+        </div>
+
+        <div id="startScreen">
+            <div class="title">MIND OVER MATTER</div>
+            <div class="subtitle">Navigate through the storm in your mind<br>Find strength in the support of others</div>
+            <div class="controls">
+                ARROW KEYS - Navigate Your Path<br>
+                SPACEBAR - Focus & Clear Negative Thoughts<br>
+                <br>
+                Press SPACEBAR to Begin Your Journey
+            </div>
+        </div>
+
+        <div id="gameOverScreen">
+            <div class="title">JOURNEY COMPLETE</div>
+            <div class="subtitle">Hope Generated: <span id="finalScore">0</span><br>Remember: You are stronger than you think</div>
+            <div class="controls">Press SPACEBAR to Start a New Journey</div>
+        </div>
+
+        <div id="victoryScreen">
+            <div class="victory-title">🧘 PEACE OF MIND 🧘</div>
+            <div class="subtitle">You have found inner peace and balance<br>Hope Generated: <span id="victoryScore">0</span><br><br>You've learned that with focus, support, and positive habits,<br>you can overcome any mental challenge.</div>
+            <div class="controls">Press SPACEBAR to Begin Another Journey</div>
+        </div>
+    </div>
+
+    <script>
+        // Mind Over Matter Game - Function-based implementation for better compatibility
+        let game = {
+            // Canvas and context
+            canvas: null,
+            ctx: null,
+            width: 800,
+            height: 600,
+            
+            // Game state
+            gameState: 'start',
+            score: 0,
+            lives: 3,
+            gameTime: 0,
+            maxGameTime: 300, // 5 minutes
+            backgroundTransition: 0, // 0 = neural network, 1 = zen clouds
+            
+            // Game objects
+            player: null,
+            focusBeams: [],
+            negativeThoughts: [],
+            particles: [],
+            powerups: [],
+            neurons: [],
+            connections: [],
+            clouds: [],
+            
+            // Input and timing
+            keys: {},
+            lastFocus: 0,
+            messageTimer: 0,
+            thoughtSpawnTimer: 0,
+            powerupSpawnTimer: 0,
+            lastTime: 0,
+            
+            // Game data
+            negativeWords: [
+                'worthless', 'failure', 'hopeless', 'anxious', 'overwhelmed',
+                'isolated', 'defeated', 'exhausted', 'lost', 'broken',
+                'inadequate', 'scared', 'lonely', 'stuck', 'numb'
+            ],
+            
+            powerupWords: [
+                'meditation', 'exercise', 'friends', 'hiking', 'journaling',
+                'therapy', 'music', 'reading', 'nature', 'sleep',
+                'mindfulness', 'gratitude', 'breathing', 'yoga'
+            ],
+            
+            supportiveMessages: [
+                "You are enough, just as you are",
+                "This feeling is temporary", 
+                "You've overcome challenges before",
+                "Take it one breath at a time",
+                "You are not alone in this",
+                "Progress, not perfection",
+                "You have the strength within you",
+                "You deserve peace and happiness"
+            ],
+
+            init: function() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.initializeNeuralNetwork();
+                this.initializeClouds();
+                this.setupEventListeners();
+                this.createPlayer();
+                this.gameLoop();
+            },
+
+            initializeNeuralNetwork: function() {
+                for (let i = 0; i < 100; i++) {
+                    this.neurons.push({
+                        x: Math.random() * this.width,
+                        y: Math.random() * this.height,
+                        size: Math.random() * 3 + 1,
+                        pulse: Math.random() * Math.PI * 2,
+                        pulseSpeed: Math.random() * 0.02 + 0.01,
+                        brightness: Math.random() * 0.5 + 0.3
+                    });
+                }
+
+                for (let i = 0; i < this.neurons.length; i++) {
+                    const neuron1 = this.neurons[i];
+                    for (let j = i + 1; j < this.neurons.length; j++) {
+                        const neuron2 = this.neurons[j];
+                        const distance = Math.sqrt(
+                            Math.pow(neuron1.x - neuron2.x, 2) + 
+                            Math.pow(neuron1.y - neuron2.y, 2)
+                        );
+                        
+                        if (distance < 100 && Math.random() < 0.3) {
+                            this.connections.push({
+                                from: neuron1,
+                                to: neuron2,
+                                strength: Math.random() * 0.5 + 0.2
+                            });
+                        }
+                    }
+                }
+            },
+
+            initializeClouds: function() {
+                for (let i = 0; i < 15; i++) {
+                    this.clouds.push({
+                        x: Math.random() * this.width * 1.5,
+                        y: Math.random() * this.height,
+                        size: Math.random() * 80 + 40,
+                        speed: Math.random() * 20 + 10,
+                        opacity: Math.random() * 0.3 + 0.1,
+                        layer: Math.random() * 3
+                    });
+                }
+            },
+
+            setupEventListeners: function() {
+                document.addEventListener('keydown', (e) => {
+                    this.keys[e.code] = true;
+                    
+                    if (e.code === 'Space') {
+                        e.preventDefault();
+                        if (this.gameState === 'start') {
+                            this.startGame();
+                        } else if (this.gameState === 'gameOver' || this.gameState === 'victory') {
+                            this.restartGame();
+                        }
+                    }
+                });
+
+                document.addEventListener('keyup', (e) => {
+                    this.keys[e.code] = false;
+                });
+            },
+
+            createPlayer: function() {
+                this.player = {
+                    x: this.width / 2,
+                    y: this.height / 2,
+                    width: 20,
+                    height: 20,
+                    speed: 250,
+                    baseSpeed: 250,
+                    beamSize: 4,
+                    baseBeamSize: 4,
+                    speedBoostTime: 0,
+                    beamBoostTime: 0
+                };
+            },
+
+            startGame: function() {
+                this.gameState = 'playing';
+                this.score = 0;
+                this.lives = 3;
+                this.gameTime = 0;
+                this.backgroundTransition = 0;
+                this.focusBeams = [];
+                this.negativeThoughts = [];
+                this.particles = [];
+                this.powerups = [];
+                this.thoughtSpawnTimer = 0;
+                this.powerupSpawnTimer = 0;
+                this.createPlayer();
+                
+                document.getElementById('startScreen').style.display = 'none';
+                document.getElementById('gameOverScreen').style.display = 'none';
+                document.getElementById('victoryScreen').style.display = 'none';
+            },
+
+            restartGame: function() {
+                this.startGame();
+            },
+
+            victory: function() {
+                this.gameState = 'victory';
+                document.getElementById('victoryScore').textContent = this.score;
+                document.getElementById('victoryScreen').style.display = 'flex';
+            },
+
+            gameOver: function() {
+                this.gameState = 'gameOver';
+                document.getElementById('finalScore').textContent = this.score;
+                document.getElementById('gameOverScreen').style.display = 'flex';
+            },
+
+            update: function(deltaTime) {
+                if (this.gameState !== 'playing') return;
+
+                // Update game time and background transition
+                this.gameTime += deltaTime;
+                this.backgroundTransition = Math.min(this.gameTime / this.maxGameTime, 1);
+                
+                // Check for victory condition
+                if (this.gameTime >= this.maxGameTime) {
+                    this.victory();
+                    return;
+                }
+
+                this.updatePlayer(deltaTime);
+                this.updateFocusBeams(deltaTime);
+                this.updateNegativeThoughts(deltaTime);
+                this.updatePowerups(deltaTime);
+                this.updateParticles(deltaTime);
+                this.updateNeuralNetwork(deltaTime);
+                this.updateClouds(deltaTime);
+                this.checkCollisions();
+                this.updateUI();
+                
+                // Spawn negative thoughts gradually
+                this.thoughtSpawnTimer += deltaTime;
+                const spawnRate = Math.max(3.0 - (this.gameTime / 60), 1.5);
+                if (this.thoughtSpawnTimer > spawnRate) {
+                    this.spawnNegativeThought();
+                    this.thoughtSpawnTimer = 0;
+                }
+                
+                // Spawn powerups occasionally
+                this.powerupSpawnTimer += deltaTime;
+                if (this.powerupSpawnTimer > 15 + Math.random() * 10) {
+                    this.spawnPowerup();
+                    this.powerupSpawnTimer = 0;
+                }
+                
+                // Show supportive messages
+                this.messageTimer += deltaTime;
+                if (this.messageTimer > 5 + Math.random() * 5) {
+                    this.showSupportMessage();
+                    this.messageTimer = 0;
+                }
+            },
+
+            updatePlayer: function(deltaTime) {
+                // Update powerup timers
+                if (this.player.speedBoostTime > 0) {
+                    this.player.speedBoostTime -= deltaTime;
+                    if (this.player.speedBoostTime <= 0) {
+                        this.player.speed = this.player.baseSpeed;
+                    }
+                }
+                
+                if (this.player.beamBoostTime > 0) {
+                    this.player.beamBoostTime -= deltaTime;
+                    if (this.player.beamBoostTime <= 0) {
+                        this.player.beamSize = this.player.baseBeamSize;
+                    }
+                }
+                
+                // Movement
+                if (this.keys['ArrowLeft'] && this.player.x > 10) {
+                    this.player.x -= this.player.speed * deltaTime;
+                }
+                if (this.keys['ArrowRight'] && this.player.x < this.width - this.player.width - 10) {
+                    this.player.x += this.player.speed * deltaTime;
+                }
+                if (this.keys['ArrowUp'] && this.player.y > 10) {
+                    this.player.y -= this.player.speed * deltaTime;
+                }
+                if (this.keys['ArrowDown'] && this.player.y < this.height - this.player.height - 10) {
+                    this.player.y += this.player.speed * deltaTime;
+                }
+
+                // Focus beam shooting
+                if (this.keys['Space'] && Date.now() - this.lastFocus > 200) {
+                    this.createFocusBeam();
+                    this.lastFocus = Date.now();
+                }
+            },
+
+            createFocusBeam: function() {
+                // Find nearest negative thought
+                let nearestThought = null;
+                let nearestDistance = Infinity;
+                
+                for (let thought of this.negativeThoughts) {
+                    const distance = Math.sqrt(
+                        Math.pow(thought.x - this.player.x, 2) + 
+                        Math.pow(thought.y - this.player.y, 2)
+                    );
+                    if (distance < nearestDistance) {
+                        nearestDistance = distance;
+                        nearestThought = thought;
+                    }
+                }
+                
+                if (nearestThought) {
+                    const angle = Math.atan2(
+                        nearestThought.y - this.player.y,
+                        nearestThought.x - this.player.x
+                    );
+                    
+                    this.focusBeams.push({
+                        x: this.player.x + this.player.width / 2,
+                        y: this.player.y + this.player.height / 2,
+                        vx: Math.cos(angle) * 400,
+                        vy: Math.sin(angle) * 400,
+                        width: this.player.beamSize,
+                        height: this.player.beamSize,
+                        life: 2,
+                        maxLife: 2
+                    });
+                }
+            },
+
+            spawnNegativeThought: function() {
+                const word = this.negativeWords[Math.floor(Math.random() * this.negativeWords.length)];
+                const edge = Math.floor(Math.random() * 4);
+                let x, y, vx, vy;
+                
+                switch (edge) {
+                    case 0: // Top
+                        x = Math.random() * this.width;
+                        y = -30;
+                        vx = (Math.random() - 0.5) * 30;
+                        vy = Math.random() * 20 + 10;
+                        break;
+                    case 1: // Right
+                        x = this.width + 30;
+                        y = Math.random() * this.height;
+                        vx = -(Math.random() * 20 + 10);
+                        vy = (Math.random() - 0.5) * 30;
+                        break;
+                    case 2: // Bottom
+                        x = Math.random() * this.width;
+                        y = this.height + 30;
+                        vx = (Math.random() - 0.5) * 30;
+                        vy = -(Math.random() * 20 + 10);
+                        break;
+                    case 3: // Left
+                        x = -30;
+                        y = Math.random() * this.height;
+                        vx = Math.random() * 20 + 10;
+                        vy = (Math.random() - 0.5) * 30;
+                        break;
+                }
+                
+                this.negativeThoughts.push({
+                    x: x, y: y, vx: vx, vy: vy,
+                    word: word,
+                    width: word.length * 12,
+                    height: 20,
+                    intensity: Math.random() * 0.5 + 0.5,
+                    wobble: Math.random() * Math.PI * 2
+                });
+            },
+
+            spawnPowerup: function() {
+                const word = this.powerupWords[Math.floor(Math.random() * this.powerupWords.length)];
+                const edge = Math.floor(Math.random() * 4);
+                let x, y, vx, vy;
+                
+                switch (edge) {
+                    case 0: x = Math.random() * this.width; y = -30; vx = (Math.random() - 0.5) * 20; vy = Math.random() * 15 + 10; break;
+                    case 1: x = this.width + 30; y = Math.random() * this.height; vx = -(Math.random() * 15 + 10); vy = (Math.random() - 0.5) * 20; break;
+                    case 2: x = Math.random() * this.width; y = this.height + 30; vx = (Math.random() - 0.5) * 20; vy = -(Math.random() * 15 + 10); break;
+                    case 3: x = -30; y = Math.random() * this.height; vx = Math.random() * 15 + 10; vy = (Math.random() - 0.5) * 20; break;
+                }
+                
+                const powerupType = Math.random() < 0.5 ? 'speed' : 'beam';
+                
+                this.powerups.push({
+                    x: x, y: y, vx: vx, vy: vy,
+                    word: word, type: powerupType,
+                    width: word.length * 12, height: 20,
+                    pulse: Math.random() * Math.PI * 2
+                });
+            },
+
+            showSupportMessage: function() {
+                const message = this.supportiveMessages[Math.floor(Math.random() * this.supportiveMessages.length)];
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'supportMessage';
+                messageDiv.textContent = message;
+                messageDiv.style.left = Math.random() * 600 + 100 + 'px';
+                messageDiv.style.top = Math.random() * 400 + 100 + 'px';
+                
+                document.getElementById('gameContainer').appendChild(messageDiv);
+                
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.parentNode.removeChild(messageDiv);
+                    }
+                }, 4000);
+            },
+
+            updateFocusBeams: function(deltaTime) {
+                for (let i = this.focusBeams.length - 1; i >= 0; i--) {
+                    const beam = this.focusBeams[i];
+                    beam.x += beam.vx * deltaTime;
+                    beam.y += beam.vy * deltaTime;
+                    beam.life -= deltaTime;
+                    
+                    if (beam.life <= 0 || beam.x < 0 || beam.x > this.width || beam.y < 0 || beam.y > this.height) {
+                        this.focusBeams.splice(i, 1);
+                    }
+                }
+            },
+
+            updateNegativeThoughts: function(deltaTime) {
+                for (let i = this.negativeThoughts.length - 1; i >= 0; i--) {
+                    const thought = this.negativeThoughts[i];
+                    
+                    thought.x += thought.vx * deltaTime;
+                    thought.y += thought.vy * deltaTime;
+                    thought.wobble += deltaTime * 2;
+                    
+                    // Move towards player
+                    const dx = this.player.x - thought.x;
+                    const dy = this.player.y - thought.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance > 0) {
+                        const attraction = 15 * deltaTime;
+                        thought.vx += (dx / distance) * attraction;
+                        thought.vy += (dy / distance) * attraction;
+                    }
+                    
+                    // Remove off-screen thoughts
+                    if (thought.x < -200 || thought.x > this.width + 200 || 
+                        thought.y < -200 || thought.y > this.height + 200) {
+                        this.negativeThoughts.splice(i, 1);
+                    }
+                }
+            },
+
+            updatePowerups: function(deltaTime) {
+                for (let i = this.powerups.length - 1; i >= 0; i--) {
+                    const powerup = this.powerups[i];
+                    powerup.x += powerup.vx * deltaTime;
+                    powerup.y += powerup.vy * deltaTime;
+                    powerup.pulse += deltaTime * 3;
+                    
+                    if (powerup.x < -200 || powerup.x > this.width + 200 || 
+                        powerup.y < -200 || powerup.y > this.height + 200) {
+                        this.powerups.splice(i, 1);
+                    }
+                }
+            },
+
+            updateParticles: function(deltaTime) {
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const particle = this.particles[i];
+                    particle.x += particle.vx * deltaTime;
+                    particle.y += particle.vy * deltaTime;
+                    particle.life -= deltaTime;
+                    particle.vy += 50 * deltaTime; // gravity
+                    
+                    if (particle.life <= 0) {
+                        this.particles.splice(i, 1);
+                    }
+                }
+            },
+
+            updateNeuralNetwork: function(deltaTime) {
+                for (let neuron of this.neurons) {
+                    neuron.pulse += neuron.pulseSpeed;
+                }
+            },
+
+            updateClouds: function(deltaTime) {
+                for (let cloud of this.clouds) {
+                    cloud.x -= cloud.speed * deltaTime;
+                    if (cloud.x < -cloud.size) {
+                        cloud.x = this.width + cloud.size;
+                    }
+                }
+            },
+
+            checkCollisions: function() {
+                // Beams vs thoughts
+                for (let i = this.focusBeams.length - 1; i >= 0; i--) {
+                    const beam = this.focusBeams[i];
+                    for (let j = this.negativeThoughts.length - 1; j >= 0; j--) {
+                        const thought = this.negativeThoughts[j];
+                        if (this.isColliding(beam, thought)) {
+                            this.createTransformationEffect(thought.x + thought.width / 2, thought.y + thought.height / 2);
+                            this.focusBeams.splice(i, 1);
+                            this.negativeThoughts.splice(j, 1);
+                            this.score += 50;
+                            break;
+                        }
+                    }
+                }
+
+                // Player vs thoughts
+                for (let i = this.negativeThoughts.length - 1; i >= 0; i--) {
+                    const thought = this.negativeThoughts[i];
+                    if (this.isColliding(this.player, thought)) {
+                        this.createOverwhelmEffect(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2);
+                        this.lives--;
+                        this.negativeThoughts.splice(i, 1);
+                        if (this.lives <= 0) {
+                            this.gameOver();
+                        }
+                        break;
+                    }
+                }
+
+                // Player vs powerups
+                for (let i = this.powerups.length - 1; i >= 0; i--) {
+                    const powerup = this.powerups[i];
+                    if (this.isColliding(this.player, powerup)) {
+                        this.applyPowerup(powerup);
+                        this.createPowerupEffect(powerup.x + powerup.width / 2, powerup.y + powerup.height / 2);
+                        this.powerups.splice(i, 1);
+                        this.score += 100;
+                        break;
+                    }
+                }
+            },
+
+            isColliding: function(obj1, obj2) {
+                return obj1.x < obj2.x + obj2.width &&
+                       obj1.x + obj1.width > obj2.x &&
+                       obj1.y < obj2.y + obj2.height &&
+                       obj1.y + obj1.height > obj2.y;
+            },
+
+            applyPowerup: function(powerup) {
+                if (powerup.type === 'speed') {
+                    this.player.speed = this.player.baseSpeed * 1.6;
+                    this.player.speedBoostTime = 10;
+                } else if (powerup.type === 'beam') {
+                    this.player.beamSize = this.player.baseBeamSize * 2;
+                    this.player.beamBoostTime = 12;
+                }
+            },
+
+            createPowerupEffect: function(x, y) {
+                for (let i = 0; i < 20; i++) {
+                    const angle = (i / 20) * Math.PI * 2;
+                    const speed = Math.random() * 200 + 100;
+                    this.particles.push({
+                        x: x, y: y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        life: Math.random() * 1.5 + 0.8,
+                        maxLife: Math.random() * 1.5 + 0.8,
+                        size: Math.random() * 5 + 3,
+                        color: [34, 197, 94]
+                    });
+                }
+            },
+
+            createTransformationEffect: function(x, y) {
+                for (let i = 0; i < 15; i++) {
+                    const angle = (i / 15) * Math.PI * 2;
+                    const speed = Math.random() * 150 + 50;
+                    this.particles.push({
+                        x: x, y: y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        life: Math.random() * 1 + 0.5,
+                        maxLife: Math.random() * 1 + 0.5,
+                        size: Math.random() * 4 + 2,
+                        color: [74, 222, 128]
+                    });
+                }
+            },
+
+            createOverwhelmEffect: function(x, y) {
+                for (let i = 0; i < 10; i++) {
+                    const angle = (i / 10) * Math.PI * 2;
+                    const speed = Math.random() * 100 + 30;
+                    this.particles.push({
+                        x: x, y: y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        life: Math.random() * 0.8 + 0.3,
+                        maxLife: Math.random() * 0.8 + 0.3,
+                        size: Math.random() * 3 + 1,
+                        color: [255, 100, 100]
+                    });
+                }
+            },
+
+            updateUI: function() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('lives').textContent = this.lives;
+                
+                const timeLeft = Math.max(0, this.maxGameTime - this.gameTime);
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = Math.floor(timeLeft % 60);
+                document.getElementById('timer').textContent = minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+                
+                document.getElementById('enemies').textContent = this.negativeThoughts.length;
+            },
+
+            render: function() {
+                // Clear with trail effect
+                this.ctx.fillStyle = 'rgba(15, 20, 25, 0.1)';
+                this.ctx.fillRect(0, 0, this.width, this.height);
+
+                // Draw background
+                this.drawBackground();
+
+                if (this.gameState !== 'playing') return;
+
+                // Draw all game objects
+                this.drawPlayer();
+                
+                for (let beam of this.focusBeams) {
+                    this.drawFocusBeam(beam);
+                }
+                
+                for (let thought of this.negativeThoughts) {
+                    this.drawNegativeThought(thought);
+                }
+                
+                for (let powerup of this.powerups) {
+                    this.drawPowerup(powerup);
+                }
+                
+                for (let particle of this.particles) {
+                    this.drawParticle(particle);
+                }
+            },
+
+            drawBackground: function() {
+                if (this.backgroundTransition < 1) {
+                    this.drawNeuralNetwork();
+                }
+                if (this.backgroundTransition > 0) {
+                    this.drawZenClouds();
+                }
+            },
+
+            drawNeuralNetwork: function() {
+                // Draw connections
+                this.ctx.strokeStyle = 'rgba(74, 222, 128, 0.1)';
+                this.ctx.lineWidth = 1;
+                
+                for (let connection of this.connections) {
+                    this.ctx.globalAlpha = connection.strength * 0.3;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(connection.from.x, connection.from.y);
+                    this.ctx.lineTo(connection.to.x, connection.to.y);
+                    this.ctx.stroke();
+                }
+
+                // Draw neurons
+                for (let neuron of this.neurons) {
+                    const pulse = Math.sin(neuron.pulse) * 0.3 + 0.7;
+                    this.ctx.globalAlpha = neuron.brightness * pulse * 0.6;
+                    this.ctx.fillStyle = '#4ade80';
+                    this.ctx.beginPath();
+                    this.ctx.arc(neuron.x, neuron.y, neuron.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+                
+                this.ctx.globalAlpha = 1;
+            },
+
+            drawZenClouds: function() {
+                this.ctx.globalAlpha = this.backgroundTransition * 0.6;
+                
+                for (let cloud of this.clouds) {
+                    const gradient = this.ctx.createRadialGradient(
+                        cloud.x, cloud.y, 0,
+                        cloud.x, cloud.y, cloud.size
+                    );
+                    
+                    gradient.addColorStop(0, 'rgba(200, 240, 200, ' + cloud.opacity + ')');
+                    gradient.addColorStop(0.6, 'rgba(150, 220, 150, ' + (cloud.opacity * 0.6) + ')');
+                    gradient.addColorStop(1, 'rgba(100, 200, 100, 0)');
+                    
+                    this.ctx.fillStyle = gradient;
+                    this.ctx.beginPath();
+                    this.ctx.arc(cloud.x, cloud.y, cloud.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+                
+                this.ctx.globalAlpha = 1;
+            },
+
+            drawPlayer: function() {
+                this.ctx.shadowColor = '#4ade80';
+                this.ctx.shadowBlur = 15;
+                this.ctx.fillStyle = '#4ade80';
+                this.ctx.beginPath();
+                this.ctx.arc(
+                    this.player.x + this.player.width / 2, 
+                    this.player.y + this.player.height / 2, 
+                    this.player.width / 2, 
+                    0, Math.PI * 2
+                );
+                this.ctx.fill();
+                this.ctx.shadowBlur = 0;
+            },
+
+            drawFocusBeam: function(beam) {
+                const alpha = beam.life / beam.maxLife;
+                this.ctx.globalAlpha = alpha;
+                this.ctx.fillStyle = '#4ade80';
+                this.ctx.shadowColor = '#4ade80';
+                this.ctx.shadowBlur = 8;
+                this.ctx.beginPath();
+                this.ctx.arc(beam.x, beam.y, beam.width, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.shadowBlur = 0;
+                this.ctx.globalAlpha = 1;
+            },
+
+            drawNegativeThought: function(thought) {
+                this.ctx.fillStyle = '#ff6b6b';
+                this.ctx.font = '16px Courier New';
+                this.ctx.textAlign = 'center';
+                
+                const wobbleOffset = Math.sin(thought.wobble) * 2;
+                this.ctx.globalAlpha = thought.intensity;
+                this.ctx.shadowColor = '#ff6b6b';
+                this.ctx.shadowBlur = 5;
+                
+                this.ctx.fillText(
+                    thought.word,
+                    thought.x + thought.width / 2,
+                    thought.y + thought.height / 2 + wobbleOffset
+                );
+                
+                this.ctx.shadowBlur = 0;
+                this.ctx.globalAlpha = 1;
+            },
+
+            drawPowerup: function(powerup) {
+                const pulse = Math.sin(powerup.pulse) * 0.3 + 0.7;
+                this.ctx.fillStyle = '#22c55e';
+                this.ctx.font = '14px Courier New';
+                this.ctx.textAlign = 'center';
+                this.ctx.globalAlpha = pulse;
+                this.ctx.shadowColor = '#22c55e';
+                this.ctx.shadowBlur = 12;
+                
+                this.ctx.fillText(
+                    powerup.word,
+                    powerup.x + powerup.width / 2,
+                    powerup.y + powerup.height / 2
+                );
+                
+                // Draw icon
+                this.ctx.font = '12px Arial';
+                const icon = powerup.type === 'speed' ? '⚡' : '🎯';
+                this.ctx.fillText(
+                    icon,
+                    powerup.x + powerup.width / 2,
+                    powerup.y - 5
+                );
+                
+                this.ctx.shadowBlur = 0;
+                this.ctx.globalAlpha = 1;
+            },
+
+            drawParticle: function(particle) {
+                const alpha = particle.life / particle.maxLife;
+                const r = particle.color[0];
+                const g = particle.color[1];
+                const b = particle.color[2];
+                
+                this.ctx.fillStyle = 'rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')';
+                this.ctx.beginPath();
+                this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                this.ctx.fill();
+            },
+
+            gameLoop: function() {
+                const currentTime = performance.now();
+                const deltaTime = Math.min((currentTime - this.lastTime) / 1000, 0.016);
+                this.lastTime = currentTime;
+
+                this.update(deltaTime);
+                this.render();
+
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        };
+
+        // Initialize the game when page loads
+        game.init();
+    </script>
+</body>
+</html>
