@@ -20,7 +20,7 @@
         #gameContainer {
             position: relative;
             width: 800px;
-            height: 600px;
+            height: 500px;
             border: 2px solid #4ade80;
             box-shadow: 
                 0 0 20px rgba(74, 222, 128, 0.5),
@@ -145,6 +145,28 @@
             0%, 100% { transform: scale(1); opacity: 0.9; }
             50% { transform: scale(1.1); opacity: 1; }
         }
+
+        .timer-option {
+            padding: 10px 20px;
+            border: 2px solid #4ade80;
+            background: rgba(74, 222, 128, 0.1);
+            color: #4ade80;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(74, 222, 128, 0.5);
+        }
+
+        .timer-option:hover {
+            background: rgba(74, 222, 128, 0.2);
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+        }
+
+        .timer-option.selected {
+            background: rgba(74, 222, 128, 0.3);
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.8);
+            color: #ffffff;
+        }
     </style>
 </head>
 <body>
@@ -164,12 +186,27 @@
 
         <div id="startScreen">
             <div class="title">MIND OVER MATTER</div>
-            <div class="subtitle">Navigate through the storm in your mind<br>Find strength in the support of others</div>
+            <div class="subtitle">
+                Navigate through the storm in your mind<br>
+                Find strength in the support of others
+            </div>
+            
+            <div style="margin: 30px 0; color: #88ffff; font-size: 18px;">
+                <div style="margin-bottom: 15px;">Choose Your Journey Length:</div>
+                <div id="timerOptions" style="display: flex; justify-content: center; gap: 40px;">
+                    <div id="timer1" class="timer-option selected">1 MIN</div>
+                    <div id="timer3" class="timer-option">3 MIN</div>
+                    <div id="timer5" class="timer-option">5 MIN</div>
+                </div>
+                <div style="margin-top: 10px; font-size: 14px; opacity: 0.7;">Use ← → to select, SPACEBAR to confirm</div>
+            </div>
+            
             <div class="controls">
                 ARROW KEYS - Navigate Your Path<br>
                 SPACEBAR - Focus & Clear Negative Thoughts<br>
+                ARROW + SPACEBAR - Angled Focus Beams<br>
                 <br>
-                Press SPACEBAR to Begin Your Journey
+                <span style="color: #00ffff;">Press SPACEBAR to Begin Your Journey</span>
             </div>
         </div>
 
@@ -182,7 +219,10 @@
         <div id="victoryScreen">
             <div class="victory-title">🧘 PEACE OF MIND 🧘</div>
             <div class="subtitle">You have found inner peace and balance<br>Hope Generated: <span id="victoryScore">0</span><br><br>You've learned that with focus, support, and positive habits,<br>you can overcome any mental challenge.</div>
-            <div class="controls">Press SPACEBAR to Begin Another Journey</div>
+            <div class="controls">Press SPACEBAR to Return to Main Menu</div>
+            
+            <!-- Heaven-like clouds background -->
+            <canvas id="heavenCanvas" width="800" height="600" style="position: absolute; top: 0; left: 0; z-index: -1; opacity: 0.8;"></canvas>
         </div>
     </div>
 
@@ -200,8 +240,13 @@
             score: 0,
             lives: 3,
             gameTime: 0,
-            maxGameTime: 300, // 5 minutes
+            maxGameTime: 60, // Default 1 minute
+            selectedTime: 1, // Selected timer option (1, 3, or 5 minutes)
             backgroundTransition: 0, // 0 = neural network, 1 = zen clouds
+            bossSpawned: false,
+            boss: null,
+            lightningFlashes: [],
+            timerStopped: false,
             
             // Game objects
             player: null,
@@ -308,8 +353,21 @@
                         e.preventDefault();
                         if (this.gameState === 'start') {
                             this.startGame();
-                        } else if (this.gameState === 'gameOver' || this.gameState === 'victory') {
+                        } else if (this.gameState === 'gameOver') {
                             this.restartGame();
+                        } else if (this.gameState === 'victory') {
+                            this.restartGame(); // Return to main menu after victory
+                        }
+                    }
+                    
+                    // Timer selection in start screen
+                    if (this.gameState === 'start') {
+                        if (e.code === 'ArrowLeft') {
+                            e.preventDefault();
+                            this.selectPreviousTimer();
+                        } else if (e.code === 'ArrowRight') {
+                            e.preventDefault();
+                            this.selectNextTimer();
                         }
                     }
                 });
@@ -317,6 +375,34 @@
                 document.addEventListener('keyup', (e) => {
                     this.keys[e.code] = false;
                 });
+            },
+
+            selectPreviousTimer: function() {
+                const timers = [1, 3, 5];
+                const currentIndex = timers.indexOf(this.selectedTime);
+                const newIndex = currentIndex > 0 ? currentIndex - 1 : timers.length - 1;
+                this.selectedTime = timers[newIndex];
+                this.maxGameTime = this.selectedTime * 60;
+                this.updateTimerDisplay();
+            },
+
+            selectNextTimer: function() {
+                const timers = [1, 3, 5];
+                const currentIndex = timers.indexOf(this.selectedTime);
+                const newIndex = currentIndex < timers.length - 1 ? currentIndex + 1 : 0;
+                this.selectedTime = timers[newIndex];
+                this.maxGameTime = this.selectedTime * 60;
+                this.updateTimerDisplay();
+            },
+
+            updateTimerDisplay: function() {
+                // Remove selected class from all options
+                document.getElementById('timer1').classList.remove('selected');
+                document.getElementById('timer3').classList.remove('selected');
+                document.getElementById('timer5').classList.remove('selected');
+                
+                // Add selected class to current option
+                document.getElementById('timer' + this.selectedTime).classList.add('selected');
             },
 
             createPlayer: function() {
@@ -330,7 +416,9 @@
                     beamSize: 4,
                     baseBeamSize: 4,
                     speedBoostTime: 0,
-                    beamBoostTime: 0
+                    beamBoostTime: 0,
+                    facing: 1, // 1 = right, -1 = left
+                    invulnerable: 0 // invulnerability timer
                 };
             },
 
@@ -339,7 +427,11 @@
                 this.score = 0;
                 this.lives = 3;
                 this.gameTime = 0;
+                this.maxGameTime = this.selectedTime * 60; // Set game time based on selection
                 this.backgroundTransition = 0;
+                this.bossSpawned = false; // Reset boss spawn flag
+                this.boss = null; // Clear any existing boss
+                this.timerStopped = false; // Reset timer
                 this.focusBeams = [];
                 this.negativeThoughts = [];
                 this.particles = [];
@@ -354,13 +446,17 @@
             },
 
             restartGame: function() {
-                this.startGame();
+                this.gameState = 'start';
+                document.getElementById('startScreen').style.display = 'flex';
+                document.getElementById('gameOverScreen').style.display = 'none';
+                document.getElementById('victoryScreen').style.display = 'none';
             },
 
             victory: function() {
                 this.gameState = 'victory';
                 document.getElementById('victoryScore').textContent = this.score;
                 document.getElementById('victoryScreen').style.display = 'flex';
+                this.drawHeavenScene();
             },
 
             gameOver: function() {
@@ -372,12 +468,22 @@
             update: function(deltaTime) {
                 if (this.gameState !== 'playing') return;
 
-                // Update game time and background transition
-                this.gameTime += deltaTime;
-                this.backgroundTransition = Math.min(this.gameTime / this.maxGameTime, 1);
+                // Update game time and background transition (stop timer when boss appears)
+                if (!this.timerStopped) {
+                    this.gameTime += deltaTime;
+                    this.backgroundTransition = Math.min(this.gameTime / this.maxGameTime, 1);
+                }
                 
-                // Check for victory condition
-                if (this.gameTime >= this.maxGameTime) {
+                // Spawn boss at 75% of game time (25% before victory)
+                const bossSpawnTime = this.maxGameTime * 0.75;
+                if (this.gameTime >= bossSpawnTime && !this.bossSpawned) {
+                    this.spawnBoss();
+                    this.bossSpawned = true;
+                    this.timerStopped = true; // Stop timer when boss appears
+                }
+                
+                // Check for victory condition (boss defeated)
+                if (this.bossSpawned && this.boss && this.boss.health <= 0) {
                     this.victory();
                     return;
                 }
@@ -389,15 +495,19 @@
                 this.updateParticles(deltaTime);
                 this.updateNeuralNetwork(deltaTime);
                 this.updateClouds(deltaTime);
+                this.updateBoss(deltaTime);
+                this.updateLightning(deltaTime);
                 this.checkCollisions();
                 this.updateUI();
                 
-                // Spawn negative thoughts gradually
-                this.thoughtSpawnTimer += deltaTime;
-                const spawnRate = Math.max(3.0 - (this.gameTime / 60), 1.5);
-                if (this.thoughtSpawnTimer > spawnRate) {
-                    this.spawnNegativeThought();
-                    this.thoughtSpawnTimer = 0;
+                // Spawn negative thoughts gradually (but not during boss fight)
+                if (!this.boss || this.boss.health <= 0) {
+                    this.thoughtSpawnTimer += deltaTime;
+                    const spawnRate = Math.max(3.0 - (this.gameTime / 60), 1.5);
+                    if (this.thoughtSpawnTimer > spawnRate) {
+                        this.spawnNegativeThought();
+                        this.thoughtSpawnTimer = 0;
+                    }
                 }
                 
                 // Spawn powerups occasionally
@@ -416,6 +526,11 @@
             },
 
             updatePlayer: function(deltaTime) {
+                // Update invulnerability timer
+                if (this.player.invulnerable > 0) {
+                    this.player.invulnerable -= deltaTime;
+                }
+                
                 // Update powerup timers
                 if (this.player.speedBoostTime > 0) {
                     this.player.speedBoostTime -= deltaTime;
@@ -434,9 +549,11 @@
                 // Movement
                 if (this.keys['ArrowLeft'] && this.player.x > 10) {
                     this.player.x -= this.player.speed * deltaTime;
+                    this.player.facing = -1;
                 }
                 if (this.keys['ArrowRight'] && this.player.x < this.width - this.player.width - 10) {
                     this.player.x += this.player.speed * deltaTime;
+                    this.player.facing = 1;
                 }
                 if (this.keys['ArrowUp'] && this.player.y > 10) {
                     this.player.y -= this.player.speed * deltaTime;
@@ -453,36 +570,50 @@
             },
 
             createFocusBeam: function() {
-                // Find nearest negative thought
-                let nearestThought = null;
-                let nearestDistance = Infinity;
+                // Calculate shooting angle based on pressed keys
+                let angle = this.player.facing === 1 ? 0 : Math.PI; // Default horizontal shooting
                 
-                for (let thought of this.negativeThoughts) {
-                    const distance = Math.sqrt(
-                        Math.pow(thought.x - this.player.x, 2) + 
-                        Math.pow(thought.y - this.player.y, 2)
-                    );
-                    if (distance < nearestDistance) {
-                        nearestDistance = distance;
-                        nearestThought = thought;
-                    }
+                // Check for diagonal shooting with arrow keys
+                if (this.keys['ArrowUp'] && this.keys['ArrowRight']) {
+                    angle = -Math.PI / 4; // Up-right
+                } else if (this.keys['ArrowUp'] && this.keys['ArrowLeft']) {
+                    angle = -3 * Math.PI / 4; // Up-left
+                } else if (this.keys['ArrowDown'] && this.keys['ArrowRight']) {
+                    angle = Math.PI / 4; // Down-right
+                } else if (this.keys['ArrowDown'] && this.keys['ArrowLeft']) {
+                    angle = 3 * Math.PI / 4; // Down-left
+                } else if (this.keys['ArrowUp']) {
+                    angle = -Math.PI / 2; // Straight up
+                } else if (this.keys['ArrowDown']) {
+                    angle = Math.PI / 2; // Straight down
+                } else if (this.keys['ArrowLeft']) {
+                    angle = Math.PI; // Left
+                } else if (this.keys['ArrowRight']) {
+                    angle = 0; // Right
                 }
                 
-                if (nearestThought) {
-                    const angle = Math.atan2(
-                        nearestThought.y - this.player.y,
-                        nearestThought.x - this.player.x
-                    );
-                    
-                    this.focusBeams.push({
+                this.focusBeams.push({
+                    x: this.player.x + this.player.width / 2,
+                    y: this.player.y + this.player.height / 2,
+                    vx: Math.cos(angle) * 400,
+                    vy: Math.sin(angle) * 400,
+                    width: this.player.beamSize,
+                    height: this.player.beamSize,
+                    life: 3,
+                    maxLife: 3
+                });
+
+                // Add focus particles
+                for (let i = 0; i < 5; i++) {
+                    this.particles.push({
                         x: this.player.x + this.player.width / 2,
                         y: this.player.y + this.player.height / 2,
-                        vx: Math.cos(angle) * 400,
-                        vy: Math.sin(angle) * 400,
-                        width: this.player.beamSize,
-                        height: this.player.beamSize,
-                        life: 2,
-                        maxLife: 2
+                        vx: Math.cos(angle) * 100 + (Math.random() - 0.5) * 50,
+                        vy: Math.sin(angle) * 100 + (Math.random() - 0.5) * 50,
+                        life: 0.4,
+                        maxLife: 0.4,
+                        size: Math.random() * 2 + 1,
+                        color: [74, 222, 128]
                     });
                 }
             },
@@ -519,13 +650,20 @@
                         break;
                 }
                 
+                // Sometimes spawn stronger enemies that require multiple hits
+                const isStrong = Math.random() < 0.3; // 30% chance
+                const health = isStrong ? 3 : 1;
+                
                 this.negativeThoughts.push({
                     x: x, y: y, vx: vx, vy: vy,
                     word: word,
                     width: word.length * 12,
                     height: 20,
+                    health: health,
+                    maxHealth: health,
                     intensity: Math.random() * 0.5 + 0.5,
-                    wobble: Math.random() * Math.PI * 2
+                    wobble: Math.random() * Math.PI * 2,
+                    isStrong: isStrong
                 });
             },
 
@@ -658,26 +796,60 @@
                     for (let j = this.negativeThoughts.length - 1; j >= 0; j--) {
                         const thought = this.negativeThoughts[j];
                         if (this.isColliding(beam, thought)) {
-                            this.createTransformationEffect(thought.x + thought.width / 2, thought.y + thought.height / 2);
+                            // Damage the thought
+                            thought.health -= 1;
                             this.focusBeams.splice(i, 1);
-                            this.negativeThoughts.splice(j, 1);
-                            this.score += 50;
+                            
+                            if (thought.health <= 0) {
+                                this.createTransformationEffect(thought.x + thought.width / 2, thought.y + thought.height / 2);
+                                this.negativeThoughts.splice(j, 1);
+                                this.score += thought.isStrong ? 150 : 50;
+                            } else {
+                                this.createHitEffect(thought.x + thought.width / 2, thought.y + thought.height / 2);
+                                this.score += 10;
+                            }
                             break;
                         }
+                    }
+                    
+                    // Beams vs boss
+                    if (this.boss && this.boss.health > 0 && this.isColliding(beam, this.boss)) {
+                        this.boss.health -= 1;
+                        this.focusBeams.splice(i, 1);
+                        this.score += 25;
+                        
+                        if (this.boss.health <= 0) {
+                            this.createBossDestroyEffect();
+                            this.score += 1000;
+                        } else {
+                            this.createHitEffect(this.boss.x + this.boss.width / 2, this.boss.y + this.boss.height / 2);
+                        }
+                        break;
                     }
                 }
 
                 // Player vs thoughts
                 for (let i = this.negativeThoughts.length - 1; i >= 0; i--) {
                     const thought = this.negativeThoughts[i];
-                    if (this.isColliding(this.player, thought)) {
+                    if (this.player.invulnerable <= 0 && this.isColliding(this.player, thought)) {
                         this.createOverwhelmEffect(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2);
                         this.lives--;
+                        this.player.invulnerable = 2.0; // 2 seconds of invulnerability
                         this.negativeThoughts.splice(i, 1);
                         if (this.lives <= 0) {
                             this.gameOver();
                         }
                         break;
+                    }
+                }
+
+                // Player vs boss
+                if (this.boss && this.boss.health > 0 && this.player.invulnerable <= 0 && this.isColliding(this.player, this.boss)) {
+                    this.createOverwhelmEffect(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2);
+                    this.lives -= 2; // Boss does more damage
+                    this.player.invulnerable = 2.0; // 2 seconds of invulnerability
+                    if (this.lives <= 0) {
+                        this.gameOver();
                     }
                 }
 
@@ -759,14 +931,158 @@
                 }
             },
 
+            spawnBoss: function() {
+                // Clear all existing enemies
+                this.negativeThoughts = [];
+                
+                // Create lightning effects
+                for (let i = 0; i < 10; i++) {
+                    this.lightningFlashes.push({
+                        x: Math.random() * this.width,
+                        y: Math.random() * this.height,
+                        width: 3 + Math.random() * 5,
+                        height: 50 + Math.random() * 100,
+                        life: 0.5 + Math.random() * 0.5,
+                        maxLife: 1,
+                        intensity: Math.random() * 0.8 + 0.2
+                    });
+                }
+                
+                // Create the boss
+                this.boss = {
+                    x: this.width / 2 - 60,
+                    y: this.height / 2 - 40,
+                    width: 120,
+                    height: 80,
+                    health: 50,
+                    maxHealth: 50,
+                    vx: 0,
+                    vy: 0,
+                    phase: 0,
+                    attackTimer: 0,
+                    pulsePhase: 0
+                };
+                
+                this.showSupportMessage();
+            },
+
+            updateBoss: function(deltaTime) {
+                if (!this.boss || this.boss.health <= 0) return;
+                
+                this.boss.phase += deltaTime;
+                this.boss.pulsePhase += deltaTime * 3;
+                this.boss.attackTimer += deltaTime;
+                
+                // Boss movement pattern
+                this.boss.x += Math.sin(this.boss.phase * 0.5) * 50 * deltaTime;
+                this.boss.y += Math.cos(this.boss.phase * 0.7) * 30 * deltaTime;
+                
+                // Keep boss on screen
+                this.boss.x = Math.max(20, Math.min(this.width - this.boss.width - 20, this.boss.x));
+                this.boss.y = Math.max(20, Math.min(this.height - this.boss.height - 20, this.boss.y));
+                
+                // Boss attacks - spawn negative thought projectiles
+                if (this.boss.attackTimer > 2) {
+                    this.spawnBossAttack();
+                    this.boss.attackTimer = 0;
+                }
+            },
+
+            spawnBossAttack: function() {
+                // Boss spawns multiple negative thoughts
+                const attacks = ['PANIC', 'FEAR', 'DREAD', 'TERROR'];
+                for (let i = 0; i < 3; i++) {
+                    const word = attacks[Math.floor(Math.random() * attacks.length)];
+                    this.negativeThoughts.push({
+                        x: this.boss.x + Math.random() * this.boss.width,
+                        y: this.boss.y + this.boss.height,
+                        vx: (Math.random() - 0.5) * 100,
+                        vy: Math.random() * 50 + 50,
+                        word: word,
+                        width: word.length * 12,
+                        height: 20,
+                        health: 2,
+                        maxHealth: 2,
+                        intensity: 1,
+                        wobble: Math.random() * Math.PI * 2,
+                        isStrong: true
+                    });
+                }
+            },
+
+            updateLightning: function(deltaTime) {
+                for (let i = this.lightningFlashes.length - 1; i >= 0; i--) {
+                    const lightning = this.lightningFlashes[i];
+                    lightning.life -= deltaTime;
+                    
+                    if (lightning.life <= 0) {
+                        this.lightningFlashes.splice(i, 1);
+                    }
+                }
+                
+                // Add occasional lightning during boss fight
+                if (this.boss && this.boss.health > 0 && Math.random() < 0.05) {
+                    this.lightningFlashes.push({
+                        x: Math.random() * this.width,
+                        y: 0,
+                        width: 2 + Math.random() * 3,
+                        height: this.height,
+                        life: 0.1 + Math.random() * 0.2,
+                        maxLife: 0.3,
+                        intensity: 0.8 + Math.random() * 0.2
+                    });
+                }
+            },
+
+            createBossDestroyEffect: function() {
+                // Epic boss destruction effect
+                for (let i = 0; i < 50; i++) {
+                    this.particles.push({
+                        x: this.boss.x + this.boss.width / 2,
+                        y: this.boss.y + this.boss.height / 2,
+                        vx: (Math.random() - 0.5) * 400,
+                        vy: (Math.random() - 0.5) * 400,
+                        life: 2.0,
+                        maxLife: 2.0,
+                        size: Math.random() * 12 + 5,
+                        color: [255, 215, 0], // Gold particles
+                        type: 'explosion'
+                    });
+                }
+                
+                // Clear all boss attacks
+                this.negativeThoughts = [];
+            },
+
+            createHitEffect: function(x, y) {
+                for (let i = 0; i < 8; i++) {
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: (Math.random() - 0.5) * 150,
+                        vy: (Math.random() - 0.5) * 150,
+                        life: 0.4,
+                        maxLife: 0.4,
+                        size: Math.random() * 4 + 2,
+                        color: [255, 255, 100],
+                        type: 'hit'
+                    });
+                }
+            },
+
             updateUI: function() {
                 document.getElementById('score').textContent = this.score;
                 document.getElementById('lives').textContent = this.lives;
                 
-                const timeLeft = Math.max(0, this.maxGameTime - this.gameTime);
-                const minutes = Math.floor(timeLeft / 60);
-                const seconds = Math.floor(timeLeft % 60);
-                document.getElementById('timer').textContent = minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+                // Update timer display (show "BOSS" when boss appears and timer stops)
+                if (this.timerStopped && this.boss && this.boss.health > 0) {
+                    document.getElementById('timer').textContent = 'BOSS';
+                } else {
+                    const timeLeft = Math.max(0, this.maxGameTime - this.gameTime);
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = Math.floor(timeLeft % 60);
+                    document.getElementById('timer').textContent = minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+                }
                 
                 document.getElementById('enemies').textContent = this.negativeThoughts.length;
             },
@@ -798,6 +1114,16 @@
                 
                 for (let particle of this.particles) {
                     this.drawParticle(particle);
+                }
+                
+                // Draw lightning effects
+                for (let lightning of this.lightningFlashes) {
+                    this.drawLightning(lightning);
+                }
+                
+                // Draw boss
+                if (this.boss && this.boss.health > 0) {
+                    this.drawBoss();
                 }
             },
 
@@ -859,17 +1185,48 @@
             },
 
             drawPlayer: function() {
+                const player = this.player;
+                
+                // Player ship glow effect
                 this.ctx.shadowColor = '#4ade80';
-                this.ctx.shadowBlur = 15;
-                this.ctx.fillStyle = '#4ade80';
+                this.ctx.shadowBlur = player.invulnerable > 0 ? 20 : 10;
+                
+                // Draw pointy ship shape
+                this.ctx.fillStyle = player.invulnerable > 0 ? '#ffffff' : '#4ade80';
                 this.ctx.beginPath();
-                this.ctx.arc(
-                    this.player.x + this.player.width / 2, 
-                    this.player.y + this.player.height / 2, 
-                    this.player.width / 2, 
-                    0, Math.PI * 2
-                );
+                
+                if (player.facing === 1) {
+                    // Facing right - pointy ship
+                    this.ctx.moveTo(player.x + player.width, player.y + player.height / 2); // Point (nose)
+                    this.ctx.lineTo(player.x, player.y); // Top left
+                    this.ctx.lineTo(player.x + 5, player.y + player.height / 2); // Middle left
+                    this.ctx.lineTo(player.x, player.y + player.height); // Bottom left
+                    this.ctx.closePath();
+                } else {
+                    // Facing left - pointy ship
+                    this.ctx.moveTo(player.x, player.y + player.height / 2); // Point (nose)
+                    this.ctx.lineTo(player.x + player.width, player.y); // Top right
+                    this.ctx.lineTo(player.x + player.width - 5, player.y + player.height / 2); // Middle right
+                    this.ctx.lineTo(player.x + player.width, player.y + player.height); // Bottom right
+                    this.ctx.closePath();
+                }
+                
                 this.ctx.fill();
+                
+                // Add engine glow at the back
+                this.ctx.fillStyle = player.invulnerable > 0 ? '#88ffff' : '#00ff88';
+                if (player.facing === 1) {
+                    // Engine at the left (back) when facing right
+                    this.ctx.beginPath();
+                    this.ctx.arc(player.x - 2, player.y + player.height / 2, 4, 0, Math.PI * 2);
+                    this.ctx.fill();
+                } else {
+                    // Engine at the right (back) when facing left
+                    this.ctx.beginPath();
+                    this.ctx.arc(player.x + player.width + 2, player.y + player.height / 2, 4, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+                
                 this.ctx.shadowBlur = 0;
             },
 
@@ -887,14 +1244,29 @@
             },
 
             drawNegativeThought: function(thought) {
-                this.ctx.fillStyle = '#ff6b6b';
-                this.ctx.font = '16px Courier New';
+                // Draw stronger enemies with different visual style
+                const isStrong = thought.health > 1;
+                this.ctx.fillStyle = isStrong ? '#cc3333' : '#ff6b6b';
+                this.ctx.font = isStrong ? 'bold 18px Courier New' : '16px Courier New';
                 this.ctx.textAlign = 'center';
                 
                 const wobbleOffset = Math.sin(thought.wobble) * 2;
-                this.ctx.globalAlpha = thought.intensity;
-                this.ctx.shadowColor = '#ff6b6b';
-                this.ctx.shadowBlur = 5;
+                const alpha = thought.intensity;
+                
+                this.ctx.globalAlpha = alpha;
+                this.ctx.shadowColor = isStrong ? '#cc3333' : '#ff6b6b';
+                this.ctx.shadowBlur = isStrong ? 10 : 5;
+                
+                // Draw stronger enemies with outline
+                if (isStrong) {
+                    this.ctx.strokeStyle = '#ffffff';
+                    this.ctx.lineWidth = 1;
+                    this.ctx.strokeText(
+                        thought.word,
+                        thought.x + thought.width / 2,
+                        thought.y + thought.height / 2 + wobbleOffset
+                    );
+                }
                 
                 this.ctx.fillText(
                     thought.word,
@@ -946,7 +1318,144 @@
                 this.ctx.fill();
             },
 
-            gameLoop: function() {
+            drawBoss: function() {
+                if (!this.boss || this.boss.health <= 0) return;
+                
+                // Boss pulsing effect
+                const pulse = Math.sin(this.boss.pulsePhase) * 0.2 + 0.8;
+                const healthRatio = this.boss.health / this.boss.maxHealth;
+                
+                // Boss body - dark menacing shape
+                this.ctx.fillStyle = `rgba(139, 0, 0, ${pulse})`;
+                this.ctx.shadowColor = '#8b0000';
+                this.ctx.shadowBlur = 20;
+                this.ctx.fillRect(this.boss.x, this.boss.y, this.boss.width, this.boss.height);
+                
+                // Boss eyes - glowing red
+                this.ctx.fillStyle = `rgba(255, 0, 0, ${pulse})`;
+                this.ctx.shadowColor = '#ff0000';
+                this.ctx.shadowBlur = 15;
+                this.ctx.beginPath();
+                this.ctx.arc(this.boss.x + 30, this.boss.y + 25, 8, 0, Math.PI * 2);
+                this.ctx.arc(this.boss.x + 90, this.boss.y + 25, 8, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Health bar
+                const barWidth = this.boss.width;
+                const barHeight = 6;
+                const barX = this.boss.x;
+                const barY = this.boss.y - 15;
+                
+                // Health bar background
+                this.ctx.fillStyle = 'rgba(100, 0, 0, 0.8)';
+                this.ctx.fillRect(barX, barY, barWidth, barHeight);
+                
+                // Health bar fill
+                this.ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';
+                this.ctx.fillRect(barX, barY, barWidth * healthRatio, barHeight);
+                
+                this.ctx.shadowBlur = 0;
+            },
+
+            drawLightning: function(lightning) {
+                const alpha = lightning.life / lightning.maxLife;
+                this.ctx.globalAlpha = alpha * lightning.intensity;
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.shadowColor = '#ffffff';
+                this.ctx.shadowBlur = 10;
+                
+                // Draw jagged lightning bolt
+                this.ctx.fillRect(lightning.x, lightning.y, lightning.width, lightning.height);
+                
+                // Add some randomness to make it flicker
+                if (Math.random() < 0.3) {
+                    this.ctx.fillRect(lightning.x - 2, lightning.y, lightning.width + 4, lightning.height);
+                }
+                
+                this.ctx.shadowBlur = 0;
+                this.ctx.globalAlpha = 1;
+            },
+
+            drawHeavenScene: function() {
+                const heavenCanvas = document.getElementById('heavenCanvas');
+                if (!heavenCanvas) return;
+                
+                const heavenCtx = heavenCanvas.getContext('2d');
+                heavenCtx.clearRect(0, 0, heavenCanvas.width, heavenCanvas.height);
+                
+                // Create heavenly gradient background
+                const gradient = heavenCtx.createLinearGradient(0, 0, 0, heavenCanvas.height);
+                gradient.addColorStop(0, '#87CEEB'); // Sky blue
+                gradient.addColorStop(0.3, '#98E4FF'); // Light blue
+                gradient.addColorStop(0.7, '#F0F8FF'); // Alice blue
+                gradient.addColorStop(1, '#FFFACD'); // Lemon chiffon
+                
+                heavenCtx.fillStyle = gradient;
+                heavenCtx.fillRect(0, 0, heavenCanvas.width, heavenCanvas.height);
+                
+                // Draw floating heavenly clouds
+                const cloudCount = 12;
+                for (let i = 0; i < cloudCount; i++) {
+                    const x = (i * heavenCanvas.width / cloudCount) + Math.sin(Date.now() * 0.001 + i) * 30;
+                    const y = 100 + Math.sin(Date.now() * 0.0008 + i * 2) * 50;
+                    const size = 40 + Math.sin(Date.now() * 0.0005 + i) * 20;
+                    
+                    this.drawHeavenCloud(heavenCtx, x, y, size);
+                }
+                
+                // Draw light rays
+                for (let i = 0; i < 8; i++) {
+                    const x = i * heavenCanvas.width / 8;
+                    const alpha = 0.1 + Math.sin(Date.now() * 0.002 + i) * 0.05;
+                    
+                    const rayGradient = heavenCtx.createLinearGradient(x, 0, x, heavenCanvas.height);
+                    rayGradient.addColorStop(0, `rgba(255, 255, 255, ${alpha})`);
+                    rayGradient.addColorStop(0.5, `rgba(255, 255, 255, ${alpha * 0.5})`);
+                    rayGradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
+                    
+                    heavenCtx.fillStyle = rayGradient;
+                    heavenCtx.fillRect(x, 0, 20, heavenCanvas.height);
+                }
+                
+                // Add floating golden particles
+                for (let i = 0; i < 20; i++) {
+                    const x = Math.random() * heavenCanvas.width;
+                    const y = Math.random() * heavenCanvas.height;
+                    const alpha = 0.3 + Math.sin(Date.now() * 0.003 + i) * 0.3;
+                    
+                    heavenCtx.fillStyle = `rgba(255, 215, 0, ${alpha})`;
+                    heavenCtx.beginPath();
+                    heavenCtx.arc(x, y, 2, 0, Math.PI * 2);
+                    heavenCtx.fill();
+                }
+                
+                // Animate the scene
+                setTimeout(() => {
+                    if (this.gameState === 'victory') {
+                        this.drawHeavenScene();
+                    }
+                }, 50);
+            },
+
+            drawHeavenCloud: function(ctx, x, y, size) {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
+                ctx.shadowBlur = 20;
+                
+                // Draw cloud with multiple overlapping circles
+                const circles = 5;
+                for (let i = 0; i < circles; i++) {
+                    const offsetX = (i - 2) * size * 0.3;
+                    const offsetY = Math.sin(i) * size * 0.2;
+                    const circleSize = size * (0.6 + Math.sin(i) * 0.2);
+                    
+                    ctx.beginPath();
+                    ctx.arc(x + offsetX, y + offsetY, circleSize, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                ctx.shadowBlur = 0;
+            },
                 const currentTime = performance.now();
                 const deltaTime = Math.min((currentTime - this.lastTime) / 1000, 0.016);
                 this.lastTime = currentTime;
