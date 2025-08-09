@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Sword Runner</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(180deg, #0a0a0a 0%, #1a0033 50%, #000011 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 1200px;
+            height: 700px;
+            border: 3px solid #00ffff;
+            box-shadow: 
+                0 0 30px rgba(0, 255, 255, 0.5),
+                inset 0 0 30px rgba(0, 255, 255, 0.1);
+            background: linear-gradient(180deg, #0a0a0a 0%, #1a0033 70%, #000022 100%);
+            overflow: hidden;
+        }
+
+        #gameCanvas {
+            display: block;
+            background: transparent;
+        }
+
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            color: #00ffff;
+            font-size: 18px;
+            font-weight: bold;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+            filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.5));
+        }
+
+        #startScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(0, 0, 0, 0.95), rgba(26, 0, 51, 0.9));
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #00ffff;
+            z-index: 20;
+        }
+
+        .cyber-title {
+            font-size: 64px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 
+                0 0 20px rgba(0, 255, 255, 1),
+                0 0 40px rgba(0, 255, 255, 0.5),
+                0 0 60px rgba(255, 0, 255, 0.3);
+            animation: cyberpulse 2s infinite;
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cyber-subtitle {
+            font-size: 20px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .cyber-controls {
+            font-size: 16px;
+            text-align: center;
+            line-height: 1.8;
+            opacity: 0.8;
+            color: #88ffff;
+        }
+
+        @keyframes cyberpulse {
+            0%, 100% { 
+                transform: scale(1); 
+                filter: brightness(1) hue-rotate(0deg);
+            }
+            25% { 
+                transform: scale(1.05); 
+                filter: brightness(1.2) hue-rotate(90deg);
+            }
+            50% { 
+                transform: scale(1.08); 
+                filter: brightness(1.4) hue-rotate(180deg);
+            }
+            75% { 
+                transform: scale(1.05); 
+                filter: brightness(1.2) hue-rotate(270deg);
+            }
+        }
+
+        .glitch {
+            animation: glitch 0.1s infinite;
+        }
+
+        @keyframes glitch {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-2px); }
+            50% { transform: translateX(2px); }
+            75% { transform: translateX(-1px); }
+            100% { transform: translateX(0); }
+        }
+
+        #gameOverScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(0, 0, 0, 0.95), rgba(51, 0, 26, 0.9));
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #ff4444;
+            z-index: 20;
+        }
+
+        .game-over-title {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(255, 68, 68, 1);
+            animation: redpulse 1.5s infinite;
+        }
+
+        @keyframes redpulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="1200" height="700"></canvas>
+        
+        <div id="ui">
+            <div>
+                <span>SCORE: <span id="score">0</span></span>
+                <span style="margin-left: 30px;">HEALTH: <span id="health">100</span></span>
+            </div>
+            <div>
+                <span>COMBO: <span id="combo">0</span>x</span>
+                <span style="margin-left: 30px;">ENEMIES: <span id="enemies">0</span></span>
+            </div>
+        </div>
+
+        <div id="startScreen">
+            <div class="cyber-title">CYBER SWORD</div>
+            <div class="cyber-title" style="font-size: 42px; margin-top: -10px;">RUNNER</div>
+            <div class="cyber-subtitle">
+                Slice through the neon-soaked dystopian future<br>
+                Your plasma blade is the only light in the darkness
+            </div>
+            <div class="cyber-controls">
+                ARROW KEYS - Move & Jump<br>
+                SPACEBAR - Slash with Cyber Sword<br>
+                SHIFT - Dash Attack<br>
+                <br>
+                <span style="color: #00ffff;">Press SPACEBAR to Enter the Grid</span>
+            </div>
+        </div>
+
+        <div id="gameOverScreen">
+            <div class="game-over-title">SYSTEM TERMINATED</div>
+            <div class="cyber-subtitle">Connection to the Grid has been severed...</div>
+            <div class="cyber-controls" style="color: #ff8888;">
+                Final Score: <span id="finalScore">0</span><br>
+                <br>
+                Press SPACEBAR to Reconnect
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let cyberGame = {
+            // Canvas and rendering
+            canvas: null,
+            ctx: null,
+            width: 1200,
+            height: 700,
+            
+            // Game state
+            gameState: 'start',
+            score: 0,
+            health: 100,
+            combo: 0,
+            comboTimer: 0,
+            lastTime: 0,
+            
+            // Camera and world
+            camera: { x: 0, y: 0 },
+            worldWidth: 5000,
+            
+            // Game objects
+            player: null,
+            enemies: [],
+            particles: [],
+            slashEffects: [],
+            buildings: [],
+            
+            // Input
+            keys: {},
+            lastSlash: 0,
+            lastDash: 0,
+            
+            // Visual effects
+            screenShake: 0,
+            glitchEffect: 0,
+
+            init: function() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.setupEventListeners();
+                this.createPlayer();
+                this.generateCityscape();
+                this.gameLoop();
+            },
+
+            setupEventListeners: function() {
+                document.addEventListener('keydown', (e) => {
+                    this.keys[e.code] = true;
+                    
+                    if (e.code === 'Space') {
+                        e.preventDefault();
+                        if (this.gameState === 'start') {
+                            this.startGame();
+                        } else if (this.gameState === 'gameOver') {
+                            this.restartGame();
+                        } else if (this.gameState === 'playing') {
+                            this.slashAttack();
+                        }
+                    }
+                    
+                    if (e.code === 'ShiftLeft' && this.gameState === 'playing') {
+                        this.dashAttack();
+                    }
+                });
+
+                document.addEventListener('keyup', (e) => {
+                    this.keys[e.code] = false;
+                });
+            },
+
+            createPlayer: function() {
+                this.player = {
+                    x: 100,
+                    y: 500,
+                    width: 40,
+                    height: 60,
+                    vx: 0,
+                    vy: 0,
+                    onGround: false,
+                    facing: 1, // 1 = right, -1 = left
+                    speed: 300,
+                    jumpPower: 400,
+                    dashCooldown: 0,
+                    slashCooldown: 0,
+                    invulnerable: 0
+                };
+            },
+
+            generateCityscape: function() {
+                // Generate cyberpunk buildings for background
+                for (let i = 0; i < 50; i++) {
+                    this.buildings.push({
+                        x: i * 100 + Math.random() * 50,
+                        y: 400 + Math.random() * 200,
+                        width: 60 + Math.random() * 80,
+                        height: 200 + Math.random() * 300,
+                        lights: Math.floor(Math.random() * 10) + 5,
+                        color: Math.random() < 0.5 ? '#003366' : '#330066',
+                        lightColor: Math.random() < 0.5 ? '#00ffff' : '#ff00ff'
+                    });
+                }
+            },
+
+            startGame: function() {
+                this.gameState = 'playing';
+                this.score = 0;
+                this.health = 100;
+                this.combo = 0;
+                this.enemies = [];
+                this.particles = [];
+                this.slashEffects = [];
+                this.createPlayer();
+                this.camera = { x: 0, y: 0 };
+                
+                document.getElementById('startScreen').style.display = 'none';
+                document.getElementById('gameOverScreen').style.display = 'none';
+            },
+
+            restartGame: function() {
+                this.startGame();
+            },
+
+            spawnEnemy: function() {
+                const types = ['drone', 'cyborg', 'turret'];
+                const type = types[Math.floor(Math.random() * types.length)];
+                
+                let enemy = {
+                    x: this.camera.x + this.width + 100,
+                    y: 450 + Math.random() * 200,
+                    width: 30,
+                    height: 30,
+                    vx: -100 - Math.random() * 100,
+                    vy: 0,
+                    health: 3,
+                    maxHealth: 3,
+                    type: type,
+                    attackTimer: 0,
+                    glowPhase: Math.random() * Math.PI * 2
+                };
+
+                if (type === 'cyborg') {
+                    enemy.width = 35;
+                    enemy.height = 50;
+                    enemy.health = 5;
+                    enemy.maxHealth = 5;
+                } else if (type === 'turret') {
+                    enemy.vx = 0;
+                    enemy.health = 8;
+                    enemy.maxHealth = 8;
+                    enemy.width = 40;
+                    enemy.height = 40;
+                }
+
+                this.enemies.push(enemy);
+            },
+
+            slashAttack: function() {
+                if (Date.now() - this.lastSlash < 300) return;
+                this.lastSlash = Date.now();
+                
+                // Create slash effect
+                this.slashEffects.push({
+                    x: this.player.x + (this.player.facing > 0 ? 40 : -20),
+                    y: this.player.y + 10,
+                    width: 60,
+                    height: 40,
+                    life: 0.2,
+                    maxLife: 0.2,
+                    facing: this.player.facing
+                });
+
+                // Check for enemy hits
+                for (let i = this.enemies.length - 1; i >= 0; i--) {
+                    const enemy = this.enemies[i];
+                    const slashRange = 80;
+                    
+                    if (Math.abs(enemy.x - this.player.x) < slashRange && 
+                        Math.abs(enemy.y - this.player.y) < 60) {
+                        
+                        this.damageEnemy(enemy, i, 2);
+                        this.screenShake = 0.3;
+                        
+                        // Create slash particles
+                        this.createSlashParticles(enemy.x, enemy.y);
+                    }
+                }
+            },
+
+            dashAttack: function() {
+                if (Date.now() - this.lastDash < 1000) return;
+                this.lastDash = Date.now();
+                
+                this.player.vx = this.player.facing * 500;
+                this.player.invulnerable = 0.5;
+                
+                // Create dash trail
+                for (let i = 0; i < 10; i++) {
+                    this.particles.push({
+                        x: this.player.x + Math.random() * 40,
+                        y: this.player.y + Math.random() * 60,
+                        vx: -this.player.facing * (50 + Math.random() * 100),
+                        vy: (Math.random() - 0.5) * 100,
+                        life: 0.8,
+                        maxLife: 0.8,
+                        size: Math.random() * 8 + 4,
+                        color: [0, 255, 255],
+                        type: 'trail'
+                    });
+                }
+            },
+
+            damageEnemy: function(enemy, index, damage) {
+                enemy.health -= damage;
+                this.combo++;
+                this.comboTimer = 2;
+                
+                if (enemy.health <= 0) {
+                    // Enemy destroyed
+                    this.score += 100 * this.combo;
+                    this.enemies.splice(index, 1);
+                    this.createDestroyEffect(enemy.x, enemy.y);
+                } else {
+                    // Enemy damaged
+                    this.score += 25;
+                    this.createHitEffect(enemy.x, enemy.y);
+                }
+            },
+
+            createSlashParticles: function(x, y) {
+                for (let i = 0; i < 15; i++) {
+                    this.particles.push({
+                        x: x + (Math.random() - 0.5) * 40,
+                        y: y + (Math.random() - 0.5) * 40,
+                        vx: (Math.random() - 0.5) * 200,
+                        vy: (Math.random() - 0.5) * 200,
+                        life: 0.6,
+                        maxLife: 0.6,
+                        size: Math.random() * 6 + 2,
+                        color: [0, 200, 255],
+                        type: 'spark'
+                    });
+                }
+            },
+
+            createDestroyEffect: function(x, y) {
+                for (let i = 0; i < 25; i++) {
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: (Math.random() - 0.5) * 300,
+                        vy: (Math.random() - 0.5) * 300,
+                        life: 1.2,
+                        maxLife: 1.2,
+                        size: Math.random() * 8 + 3,
+                        color: Math.random() < 0.5 ? [255, 100, 255] : [100, 255, 255],
+                        type: 'explosion'
+                    });
+                }
+            },
+
+            createHitEffect: function(x, y) {
+                for (let i = 0; i < 8; i++) {
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: (Math.random() - 0.5) * 150,
+                        vy: (Math.random() - 0.5) * 150,
+                        life: 0.4,
+                        maxLife: 0.4,
+                        size: Math.random() * 4 + 2,
+                        color: [255, 255, 0],
+                        type: 'hit'
+                    });
+                }
+            },
+
+            update: function(deltaTime) {
+                if (this.gameState !== 'playing') return;
+
+                this.updatePlayer(deltaTime);
+                this.updateEnemies(deltaTime);
+                this.updateParticles(deltaTime);
+                this.updateSlashEffects(deltaTime);
+                this.updateCamera();
+                this.updateUI();
+
+                // Spawn enemies periodically
+                if (Math.random() < 0.02) {
+                    this.spawnEnemy();
+                }
+
+                // Update combo timer
+                this.comboTimer -= deltaTime;
+                if (this.comboTimer <= 0) {
+                    this.combo = 0;
+                }
+
+                // Update screen effects
+                this.screenShake = Math.max(0, this.screenShake - deltaTime * 3);
+                this.glitchEffect = Math.max(0, this.glitchEffect - deltaTime * 5);
+
+                // Check game over
+                if (this.health <= 0) {
+                    this.gameOver();
+                }
+            },
+
+            updatePlayer: function(deltaTime) {
+                // Horizontal movement
+                if (this.keys['ArrowLeft']) {
+                    this.player.vx = -this.player.speed;
+                    this.player.facing = -1;
+                } else if (this.keys['ArrowRight']) {
+                    this.player.vx = this.player.speed;
+                    this.player.facing = 1;
+                } else {
+                    this.player.vx *= 0.8; // Friction
+                }
+
+                // Jumping
+                if (this.keys['ArrowUp'] && this.player.onGround) {
+                    this.player.vy = -this.player.jumpPower;
+                    this.player.onGround = false;
+                }
+
+                // Apply gravity
+                this.player.vy += 800 * deltaTime;
+
+                // Update position
+                this.player.x += this.player.vx * deltaTime;
+                this.player.y += this.player.vy * deltaTime;
+
+                // Ground collision
+                const groundY = 560;
+                if (this.player.y + this.player.height > groundY) {
+                    this.player.y = groundY - this.player.height;
+                    this.player.vy = 0;
+                    this.player.onGround = true;
+                }
+
+                // Update timers
+                this.player.invulnerable = Math.max(0, this.player.invulnerable - deltaTime);
+            },
+
+            updateEnemies: function(deltaTime) {
+                for (let i = this.enemies.length - 1; i >= 0; i--) {
+                    const enemy = this.enemies[i];
+                    
+                    enemy.x += enemy.vx * deltaTime;
+                    enemy.y += enemy.vy * deltaTime;
+                    enemy.glowPhase += deltaTime * 4;
+
+                    // Enemy AI behavior
+                    if (enemy.type === 'drone') {
+                        enemy.vy = Math.sin(enemy.glowPhase) * 30;
+                    } else if (enemy.type === 'cyborg') {
+                        // Cyborg walks on ground
+                        if (enemy.y < 510) {
+                            enemy.vy += 400 * deltaTime; // Gravity
+                        } else {
+                            enemy.y = 510;
+                            enemy.vy = 0;
+                        }
+                    }
+
+                    // Check collision with player
+                    if (!this.player.invulnerable && 
+                        Math.abs(enemy.x - this.player.x) < 50 && 
+                        Math.abs(enemy.y - this.player.y) < 50) {
+                        this.health -= 20;
+                        this.player.invulnerable = 1.0;
+                        this.screenShake = 0.5;
+                        this.glitchEffect = 0.3;
+                        this.createHitEffect(this.player.x, this.player.y);
+                    }
+
+                    // Remove enemies that are too far behind
+                    if (enemy.x < this.camera.x - 200) {
+                        this.enemies.splice(i, 1);
+                    }
+                }
+            },
+
+            updateParticles: function(deltaTime) {
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const particle = this.particles[i];
+                    
+                    particle.x += particle.vx * deltaTime;
+                    particle.y += particle.vy * deltaTime;
+                    particle.life -= deltaTime;
+                    
+                    if (particle.type === 'spark' || particle.type === 'explosion') {
+                        particle.vy += 200 * deltaTime; // Gravity
+                    }
+
+                    if (particle.life <= 0) {
+                        this.particles.splice(i, 1);
+                    }
+                }
+            },
+
+            updateSlashEffects: function(deltaTime) {
+                for (let i = this.slashEffects.length - 1; i >= 0; i--) {
+                    const slash = this.slashEffects[i];
+                    slash.life -= deltaTime;
+                    
+                    if (slash.life <= 0) {
+                        this.slashEffects.splice(i, 1);
+                    }
+                }
+            },
+
+            updateCamera: function() {
+                // Follow player
+                this.camera.x = this.player.x - this.width * 0.3;
+                this.camera.x = Math.max(0, this.camera.x);
+                this.camera.x = Math.min(this.worldWidth - this.width, this.camera.x);
+                
+                // Screen shake
+                if (this.screenShake > 0) {
+                    this.camera.x += (Math.random() - 0.5) * this.screenShake * 20;
+                    this.camera.y += (Math.random() - 0.5) * this.screenShake * 20;
+                }
+            },
+
+            updateUI: function() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('health').textContent = Math.max(0, this.health);
+                document.getElementById('combo').textContent = this.combo;
+                document.getElementById('enemies').textContent = this.enemies.length;
+            },
+
+            gameOver: function() {
+                this.gameState = 'gameOver';
+                document.getElementById('finalScore').textContent = this.score;
+                document.getElementById('gameOverScreen').style.display = 'flex';
+            },
+
+            render: function() {
+                // Clear canvas
+                this.ctx.fillStyle = 'rgba(10, 10, 10, 0.1)';
+                this.ctx.fillRect(0, 0, this.width, this.height);
+
+                this.ctx.save();
+                this.ctx.translate(-this.camera.x, -this.camera.y);
+
+                // Draw cityscape background
+                this.drawCityscape();
+
+                if (this.gameState === 'playing') {
+                    // Draw game objects
+                    this.drawPlayer();
+                    
+                    for (let enemy of this.enemies) {
+                        this.drawEnemy(enemy);
+                    }
+                    
+                    for (let slash of this.slashEffects) {
+                        this.drawSlashEffect(slash);
+                    }
+                    
+                    for (let particle of this.particles) {
+                        this.drawParticle(particle);
+                    }
+
+                    // Draw ground line
+                    this.ctx.strokeStyle = '#00ffff';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(this.camera.x, 560);
+                    this.ctx.lineTo(this.camera.x + this.width, 560);
+                    this.ctx.stroke();
+                }
+
+                this.ctx.restore();
+
+                // Apply glitch effect
+                if (this.glitchEffect > 0) {
+                    this.applyGlitchEffect();
+                }
+            },
+
+            drawCityscape: function() {
+                for (let building of this.buildings) {
+                    if (building.x + building.width < this.camera.x - 100 || 
+                        building.x > this.camera.x + this.width + 100) continue;
+
+                    // Building silhouette
+                    this.ctx.fillStyle = building.color;
+                    this.ctx.fillRect(building.x, building.y, building.width, building.height);
+
+                    // Building lights
+                    this.ctx.fillStyle = building.lightColor;
+                    for (let i = 0; i < building.lights; i++) {
+                        const lightX = building.x + 10 + (i % 3) * 20;
+                        const lightY = building.y + 20 + Math.floor(i / 3) * 30;
+                        if (Math.random() < 0.8) { // Flickering effect
+                            this.ctx.fillRect(lightX, lightY, 8, 12);
+                        }
+                    }
+                }
+            },
+
+            drawPlayer: function() {
+                const player = this.player;
+                
+                // Player glow effect
+                this.ctx.shadowColor = '#00ffff';
+                this.ctx.shadowBlur = player.invulnerable > 0 ? 20 : 10;
+                
+                // Player body (cyber suit)
+                this.ctx.fillStyle = player.invulnerable > 0 ? '#ffffff' : '#004466';
+                this.ctx.fillRect(player.x, player.y, player.width, player.height);
+                
+                // Cyber details
+                this.ctx.fillStyle = '#00ffff';
+                this.ctx.fillRect(player.x + 5, player.y + 5, 30, 3);
+                this.ctx.fillRect(player.x + 5, player.y + 15, 30, 3);
+                this.ctx.fillRect(player.x + 5, player.y + 25, 30, 3);
+                
+                // Eyes/visor
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.fillRect(player.x + 10, player.y + 8, 20, 8);
+                
+                this.ctx.shadowBlur = 0;
+            },
+
+            drawEnemy: function(enemy) {
+                const glow = Math.sin(enemy.glowPhase) * 0.3 + 0.7;
+                this.ctx.shadowBlur = 15;
+                
+                if (enemy.type === 'drone') {
+                    this.ctx.shadowColor = '#ff00ff';
+                    this.ctx.fillStyle = `rgba(255, 0, 255, ${glow})`;
+                    this.ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+                    
+                    // Drone details
+                    this.ctx.fillStyle = '#ffffff';
+                    this.ctx.fillRect(enemy.x + 10, enemy.y + 10, 10, 10);
+                    
+                } else if (enemy.type === 'cyborg') {
+                    this.ctx.shadowColor = '#ff4444';
+                    this.ctx.fillStyle = `rgba(255, 68, 68, ${glow})`;
+                    this.ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+                    
+                    // Cyborg details
+                    this.ctx.fillStyle = '#ffffff';
+                    this.ctx.fillRect(enemy.x + 5, enemy.y + 5, enemy.width - 10, 5);
+                    
+                } else if (enemy.type === 'turret') {
+                    this.ctx.shadowColor = '#ffff00';
+                    this.ctx.fillStyle = `rgba(255, 255, 0, ${glow})`;
+                    this.ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+                    
+                    // Turret barrel
+                    this.ctx.fillRect(enemy.x - 15, enemy.y + 15, 15, 10);
+                }
+                
+                this.ctx.shadowBlur = 0;
+            },
+
+            drawSlashEffect: function(slash) {
+                const alpha = slash.life / slash.maxLife;
+                this.ctx.save();
+                
+                this.ctx.globalAlpha = alpha;
+                this.ctx.shadowColor = '#00ffff';
+                this.ctx.shadowBlur = 20;
+                
+                // Draw blue energy slash
+                const gradient = this.ctx.createLinearGradient(
+                    slash.x, slash.y,
+                    slash.x + slash.width * slash.facing, slash.y + slash.height
+                );
+                gradient.addColorStop(0, 'rgba(0, 255, 255, 0.8)');
+                gradient.addColorStop(0.5, 'rgba(255, 255, 255, 1)');
+                gradient.addColorStop(1, 'rgba(0, 200, 255, 0.6)');
+                
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(slash.x, slash.y, slash.width * slash.facing, slash.height);
+                
+                this.ctx.restore();
+            },
+
+            drawParticle: function(particle) {
+                const alpha = particle.life / particle.maxLife;
+                const [r, g, b] = particle.color;
+                
+                this.ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+                this.ctx.shadowColor = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+                this.ctx.shadowBlur = 10;
+                
+                this.ctx.beginPath();
+                this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                this.ctx.shadowBlur = 0;
+            },
+
+            applyGlitchEffect: function() {
+                // Simple glitch effect by drawing random rectangles
+                this.ctx.fillStyle = 'rgba(255, 0, 255, 0.1)';
+                for (let i = 0; i < 5; i++) {
+                    this.ctx.fillRect(
+                        Math.random() * this.width,
+                        Math.random() * this.height,
+                        Math.random() * 100 + 50,
+                        Math.random() * 20 + 5
+                    );
+                }
+            },
+
+            gameLoop: function() {
+                const currentTime = performance.now();
+                const deltaTime = Math.min((currentTime - this.lastTime) / 1000, 0.016);
+                this.lastTime = currentTime;
+
+                this.update(deltaTime);
+                this.render();
+
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        };
+
+        // Initialize the cyber game
+        cyberGame.init();
+    </script>
+</body>
+</html>
