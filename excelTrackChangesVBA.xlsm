@@ -1,0 +1,170 @@
+'============================
+' MODULE CODE (Standard Module, e.g., Module1)
+'============================
+Option Explicit
+
+'== CONFIG ==
+Public Const DATA_SHEET As String = "Sheet1"          ' <-- rename to your sheet name
+Public Const LOG_SHEET As String = "Change_Log"
+Public Const REPORT_SHEET As String = "Variance_Report"
+Public Const COL_EVENT As Long = 1    ' A: Event/Sponsorship/Organization Name
+Public Const COL_NEW As Long = 2      ' B: New (Yes/No)
+Public Const COL_PLANNED As Long = 7  ' G: Planned Amount
+Public Const COL_APPROVED As Long = 8 ' H: Approved Amount
+Public Const COL_VARIANCE As Long = 9 ' I: Amount Variance (optional live calc)
+
+'Ensure a sheet exists (create if needed)
+Public Function EnsureSheet(ByVal sheetName As String) As Worksheet
+    On Error Resume Next
+    Set EnsureSheet = ThisWorkbook.Worksheets(sheetName)
+    On Error GoTo 0
+    If EnsureSheet Is Nothing Then
+        Set EnsureSheet = ThisWorkbook.Worksheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+        EnsureSheet.Name = sheetName
+    End If
+End Function
+
+'Parse currency like "$15,000", "TBD", "N/A" safely to Double. Returns 0 for non-numbers.
+Public Function ParseMoney(ByVal v As Variant) As Double
+    Dim s As String
+    s = Trim$(CStr(v))
+    If s = "" Then Exit Function
+    If UCase$(s) = "TBD" Or UCase$(s) = "N/A" Then Exit Function
+    s = Replace$(s, "$", "")
+    s = Replace$(s, ",", "")
+    If IsNumeric(s) Then ParseMoney = CDbl(s)
+End Function
+
+'Append one line to the Change_Log (includes Old and New values)
+Public Sub AppendChangeLog(ByVal rowNum As Long, ByVal colNum As Long, _
+                           ByVal oldVal As Variant, ByVal newVal As Variant, _
+                           ByVal plannedVal As Variant, ByVal approvedVal As Variant)
+
+    Dim wsLog As Worksheet, nextRow As Long, wsData As Worksheet
+    Set wsLog = EnsureSheet(LOG_SHEET)
+    Set wsData = ThisWorkbook.Worksheets(DATA_SHEET)
+
+    If wsLog.Range("A1").Value = "" Then
+        wsLog.Range("A1:I1").Value = Array("When", "User", "Row", "Changed Column", "Event/Org", "Old Value", "New Value", "Planned (row)", "Approved (row)")
+        wsLog.Rows(1).Font.Bold = True
+        wsLog.Columns.AutoFit
+    End If
+
+    nextRow = wsLog.Cells(wsLog.Rows.Count, 1).End(xlUp).Row + 1
+    wsLog.Cells(nextRow, 1).Value = Now
+    wsLog.Cells(nextRow, 2).Value = Environ$("Username")
+    wsLog.Cells(nextRow, 3).Value = rowNum
+    wsLog.Cells(nextRow, 4).Value = IIf(colNum = COL_PLANNED, "Planned (G)", "Approved (H)")
+    wsLog.Cells(nextRow, 5).Value = wsData.Cells(rowNum, COL_EVENT).Value
+    wsLog.Cells(nextRow, 6).Value = oldVal
+    wsLog.Cells(nextRow, 7).Value = newVal
+    wsLog.Cells(nextRow, 8).Value = plannedVal
+    wsLog.Cells(nextRow, 9).Value = approvedVal
+End Sub
+
+'Rebuild a report of all rows where Planned <> Approved
+Public Sub RebuildVarianceReport()
+    Dim wsData As Worksheet, wsRep As Worksheet, r As Long, lastRow As Long, outRow As Long
+    Set wsData = ThisWorkbook.Worksheets(DATA_SHEET)
+    Set wsRep = EnsureSheet(REPORT_SHEET)
+
+    wsRep.Cells.Clear
+    wsRep.Range("A1:F1").Value = Array("Event/Org", "New?", "Planned", "Approved", "Variance", "Row #")
+    wsRep.Rows(1).Font.Bold = True
+
+    lastRow = wsData.Cells(wsData.Rows.Count, COL_EVENT).End(xlUp).Row
+    outRow = 2
+
+    For r = 2 To lastRow ' assumes headers on row 1
+        Dim p As Double, a As Double
+        p = ParseMoney(wsData.Cells(r, COL_PLANNED).Value)
+        a = ParseMoney(wsData.Cells(r, COL_APPROVED).Value)
+        If p <> a Then
+            wsRep.Cells(outRow, 1).Value = wsData.Cells(r, COL_EVENT).Value
+            wsRep.Cells(outRow, 2).Value = wsData.Cells(r, COL_NEW).Value
+            wsRep.Cells(outRow, 3).Value = p
+            wsRep.Cells(outRow, 4).Value = a
+            wsRep.Cells(outRow, 5).Value = p - a
+            wsRep.Cells(outRow, 6).Value = r
+            outRow = outRow + 1
+        End If
+    Next r
+
+    If outRow > 2 Then
+        wsRep.Range("C2:E" & wsRep.Cells(wsRep.Rows.Count, "C").End(xlUp).Row).NumberFormat = "$#,##0"
+    End If
+    wsRep.Columns.AutoFit
+End Sub
+
+
+'============================
+' SHEET CODE (Right-click the data sheet tab > View Code)
+'============================
+Option Explicit
+
+Dim OldValue As Variant
+Dim OldAddress As String
+
+' Capture the pre-edit value when user selects a single cell in G:H
+Private Sub Worksheet_SelectionChange(ByVal Target As Range)
+    On Error Resume Next
+    If Target.Count = 1 Then
+        If Not Intersect(Target, Me.Range("G:H")) Is Nothing Then
+            OldValue = Target.Value
+            OldAddress = Target.Address
+        Else
+            OldValue = vbNullString
+            OldAddress = vbNullString
+        End If
+    Else
+        OldValue = vbNullString
+        OldAddress = vbNullString
+    End If
+End Sub
+
+' Log changes when Planned (G) or Approved (H) is edited
+Private Sub Worksheet_Change(ByVal Target As Range)
+    On Error GoTo CleanExit
+
+    Dim rngWatch As Range
+    Set rngWatch = Union(Me.Columns(7), Me.Columns(8)) ' G:H
+
+    If Intersect(Target, rngWatch) Is Nothing Then Exit Sub
+
+    Application.EnableEvents = False
+
+    Dim c As Range
+    For Each c In Intersect(Target, rngWatch).Cells
+        Dim r As Long, plannedNow As Variant, approvedNow As Variant
+        r = c.Row
+        plannedNow = Me.Cells(r, 7).Value
+        approvedNow = Me.Cells(r, 8).Value
+
+        ' Optional: live variance in column I
+        Dim p As Double, a As Double
+        p = ParseMoney(plannedNow)
+        a = ParseMoney(approvedNow)
+        If p = 0 And a = 0 Then
+            Me.Cells(r, 9).ClearContents
+        Else
+            Me.Cells(r, 9).Value = p - a
+            Me.Cells(r, 9).NumberFormat = "$#,##0"
+        End If
+
+        ' Determine old value to log (best-effort for single-cell edits)
+        Dim oldValToLog As Variant
+        If c.Address = OldAddress Then
+            oldValToLog = OldValue
+        Else
+            oldValToLog = "(unknown)" ' occurs with multi-cell paste or programmatic edits
+        End If
+
+        ' Write the log entry (Old -> New)
+        AppendChangeLog r, c.Column, oldValToLog, c.Value, plannedNow, approvedNow
+    Next c
+
+CleanExit:
+    Application.EnableEvents = True
+    OldValue = vbNullString
+    OldAddress = vbNullString
+End Sub
