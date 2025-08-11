@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anime Cyberpunk Glitch Button</title>
+    <style>
+        /* Import anime-style fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;700&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, 
+                #1a0033 0%, 
+                #4a0e4e 25%, 
+                #2d1b69 50%, 
+                #0f3460 75%, 
+                #1a0033 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Exo 2', sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated background with anime-style particles */
+        .anime-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .floating-icons {
+            position: absolute;
+            font-size: 20px;
+            animation: floatUp 8s infinite linear;
+            opacity: 0.3;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.3; }
+            90% { opacity: 0.3; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* Hexagonal grid pattern */
+        .hex-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(255, 105, 180, 0.1) 2px, transparent 2px),
+                radial-gradient(circle at 75% 75%, rgba(0, 255, 255, 0.1) 2px, transparent 2px);
+            background-size: 60px 60px;
+            animation: hexMove 15s linear infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes hexMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(60px, 60px); }
+        }
+
+        /* Main button container */
+        .button-container {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Anime Cyberpunk button styles */
+        .anime-cyber-button {
+            position: relative;
+            padding: 35px 70px;
+            font-size: 32px;
+            font-weight: 700;
+            font-family: 'Exo 2', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #ff69b4;
+            background: linear-gradient(135deg, 
+                rgba(255, 105, 180, 0.1) 0%, 
+                rgba(138, 43, 226, 0.1) 50%, 
+                rgba(0, 255, 255, 0.1) 100%);
+            border: 3px solid transparent;
+            background-clip: padding-box;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            
+            /* Anime-style rounded corners with cut */
+            border-radius: 25px 5px 25px 5px;
+            
+            /* Multi-layered glow */
+            box-shadow: 
+                0 0 30px rgba(255, 105, 180, 0.4),
+                0 0 60px rgba(138, 43, 226, 0.2),
+                inset 0 0 30px rgba(0, 255, 255, 0.1),
+                inset 0 0 0 3px rgba(255, 105, 180, 0.3);
+        }
+
+        /* Animated border */
+        .anime-cyber-button::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            background: linear-gradient(45deg, 
+                #ff69b4, #00ffff, #8a2be2, #ff1493, 
+                #00bfff, #ff69b4, #8a2be2, #00ffff);
+            background-size: 400% 400%;
+            border-radius: 25px 5px 25px 5px;
+            z-index: -1;
+            animation: rainbowBorder 3s ease-in-out infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        @keyframes rainbowBorder {
+            0%, 100% { background-position: 0% 50%; }
+            25% { background-position: 100% 50%; }
+            50% { background-position: 100% 100%; }
+            75% { background-position: 0% 100%; }
+        }
+
+        /* Button text with anime styling */
+        .anime-cyber-button .text {
+            position: relative;
+            z-index: 3;
+            display: block;
+            transition: all 0.3s ease;
+            text-shadow: 
+                0 0 10px rgba(255, 105, 180, 0.8),
+                0 0 20px rgba(255, 105, 180, 0.4);
+        }
+
+        /* Kawaii sparkles */
+        .sparkle {
+            position: absolute;
+            color: #ff69b4;
+            font-size: 16px;
+            animation: sparkleAnim 2s infinite;
+            pointer-events: none;
+        }
+
+        .sparkle:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+        .sparkle:nth-child(2) { top: 20%; right: 15%; animation-delay: 0.5s; }
+        .sparkle:nth-child(3) { bottom: 15%; left: 20%; animation-delay: 1s; }
+        .sparkle:nth-child(4) { bottom: 10%; right: 10%; animation-delay: 1.5s; }
+
+        @keyframes sparkleAnim {
+            0%, 100% { 
+                opacity: 0; 
+                transform: scale(0) rotate(0deg); 
+            }
+            50% { 
+                opacity: 1; 
+                transform: scale(1.2) rotate(180deg); 
+            }
+        }
+
+        /* Hearts floating effect */
+        .hearts {
+            position: absolute;
+            top: -50px;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .heart {
+            position: absolute;
+            color: #ff1493;
+            font-size: 12px;
+            animation: heartFloat 6s infinite linear;
+            opacity: 0;
+        }
+
+        @keyframes heartFloat {
+            0% { 
+                opacity: 0; 
+                transform: translateY(0) scale(0); 
+            }
+            10% { 
+                opacity: 0.8; 
+                transform: translateY(-20px) scale(1); 
+            }
+            90% { 
+                opacity: 0.8; 
+                transform: translateY(-100px) scale(1); 
+            }
+            100% { 
+                opacity: 0; 
+                transform: translateY(-120px) scale(0); 
+            }
+        }
+
+        /* Hover state with anime effects */
+        .anime-cyber-button:hover {
+            color: #ffffff;
+            background: linear-gradient(135deg, 
+                rgba(255, 105, 180, 0.3) 0%, 
+                rgba(138, 43, 226, 0.3) 50%, 
+                rgba(0, 255, 255, 0.3) 100%);
+            
+            box-shadow: 
+                0 0 60px rgba(255, 105, 180, 0.8),
+                0 0 120px rgba(138, 43, 226, 0.6),
+                0 0 180px rgba(0, 255, 255, 0.4),
+                inset 0 0 60px rgba(255, 105, 180, 0.2);
+            
+            transform: translateY(-5px) scale(1.05);
+        }
+
+        .anime-cyber-button:hover::before {
+            opacity: 1;
+        }
+
+        /* Anime glitch effect */
+        .anime-cyber-button:hover .text {
+            animation: animeGlitch 0.5s ease-in-out infinite;
+        }
+
+        @keyframes animeGlitch {
+            0%, 100% { 
+                transform: translate(0); 
+                filter: hue-rotate(0deg) saturate(1);
+                text-shadow: 
+                    0 0 10px rgba(255, 105, 180, 0.8),
+                    0 0 20px rgba(255, 105, 180, 0.4);
+            }
+            10% { 
+                transform: translate(-3px, 2px); 
+                filter: hue-rotate(90deg) saturate(1.5);
+                text-shadow: 
+                    2px 0 0 #ff0080,
+                    -2px 0 0 #00ff80,
+                    0 0 20px rgba(255, 105, 180, 1);
+            }
+            20% { 
+                transform: translate(2px, -2px); 
+                filter: hue-rotate(180deg) saturate(2);
+                text-shadow: 
+                    -1px 0 0 #ff0080,
+                    1px 0 0 #00ff80,
+                    0 0 20px rgba(138, 43, 226, 1);
+            }
+            30% { 
+                transform: translate(-2px, 2px); 
+                filter: hue-rotate(270deg) saturate(1.5);
+                text-shadow: 
+                    1px 0 0 #ff0080,
+                    -1px 0 0 #00ffff,
+                    0 0 20px rgba(0, 255, 255, 1);
+            }
+            40% { 
+                transform: translate(3px, -1px); 
+                filter: hue-rotate(45deg) saturate(1.8);
+                text-shadow: 
+                    -2px 0 0 #8a2be2,
+                    2px 0 0 #ff69b4,
+                    0 0 25px rgba(255, 105, 180, 1.2);
+            }
+            60% { 
+                transform: translate(-1px, 3px); 
+                filter: hue-rotate(135deg) saturate(1.3);
+                text-shadow: 
+                    1px 0 0 #ff1493,
+                    -1px 0 0 #00bfff,
+                    0 0 15px rgba(138, 43, 226, 0.8);
+            }
+            80% { 
+                transform: translate(2px, -3px); 
+                filter: hue-rotate(225deg) saturate(1.7);
+                text-shadow: 
+                    -1px 0 0 #ff69b4,
+                    1px 0 0 #00ffff,
+                    0 0 30px rgba(0, 255, 255, 1);
+            }
+        }
+
+        /* Kawaii pulse effect */
+        .anime-cyber-button:hover {
+            animation: kawaiPulse 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes kawaiPulse {
+            0% { 
+                box-shadow: 
+                    0 0 60px rgba(255, 105, 180, 0.8),
+                    0 0 120px rgba(138, 43, 226, 0.6),
+                    0 0 180px rgba(0, 255, 255, 0.4);
+            }
+            100% { 
+                box-shadow: 
+                    0 0 80px rgba(255, 105, 180, 1),
+                    0 0 160px rgba(138, 43, 226, 0.8),
+                    0 0 240px rgba(0, 255, 255, 0.6);
+            }
+        }
+
+        /* Active/clicked state with anime burst */
+        .anime-cyber-button:active {
+            transform: translateY(-2px) scale(0.98);
+            animation: animeBurst 0.3s ease-out;
+        }
+
+        @keyframes animeBurst {
+            0% { 
+                filter: brightness(1); 
+                box-shadow: 
+                    0 0 60px rgba(255, 105, 180, 0.8),
+                    0 0 120px rgba(138, 43, 226, 0.6);
+            }
+            50% { 
+                filter: brightness(2) saturate(2); 
+                box-shadow: 
+                    0 0 120px rgba(255, 105, 180, 1.2),
+                    0 0 240px rgba(138, 43, 226, 1),
+                    0 0 360px rgba(0, 255, 255, 0.8);
+            }
+            100% { 
+                filter: brightness(1.5) saturate(1.5); 
+                box-shadow: 
+                    0 0 80px rgba(255, 105, 180, 1),
+                    0 0 160px rgba(138, 43, 226, 0.8);
+            }
+        }
+
+        /* Anime-style corner decorations */
+        .corner-deco {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ff69b4;
+            transition: all 0.3s ease;
+        }
+
+        .corner-deco.top-left {
+            top: -10px;
+            left: -10px;
+            border-right: none;
+            border-bottom: none;
+            border-radius: 15px 0 0 0;
+        }
+
+        .corner-deco.top-right {
+            top: -10px;
+            right: -10px;
+            border-left: none;
+            border-bottom: none;
+            border-radius: 0 15px 0 0;
+        }
+
+        .corner-deco.bottom-left {
+            bottom: -10px;
+            left: -10px;
+            border-right: none;
+            border-top: none;
+            border-radius: 0 0 0 15px;
+        }
+
+        .corner-deco.bottom-right {
+            bottom: -10px;
+            right: -10px;
+            border-left: none;
+            border-top: none;
+            border-radius: 0 0 15px 0;
+        }
+
+        .anime-cyber-button:hover .corner-deco {
+            border-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+            animation: cornerSpin 0.6s ease-in-out infinite alternate;
+        }
+
+        @keyframes cornerSpin {
+            0% { transform: rotate(0deg) scale(1); }
+            100% { transform: rotate(15deg) scale(1.1); }
+        }
+
+        /* Demo text with anime styling */
+        .demo-info {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ff69b4;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 16px;
+            text-align: center;
+            opacity: 0.8;
+            animation: kawaiiGlow 2s ease-in-out infinite alternate;
+            text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+        }
+
+        @keyframes kawaiiGlow {
+            0% { 
+                opacity: 0.8; 
+                text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+            }
+            100% { 
+                opacity: 1; 
+                text-shadow: 0 0 20px rgba(255, 105, 180, 0.8);
+            }
+        }
+
+        /* Anime loading circles */
+        .loading-rings {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .anime-cyber-button:hover .loading-rings {
+            opacity: 0.6;
+        }
+
+        .ring {
+            position: absolute;
+            border: 2px solid transparent;
+            border-top: 2px solid #ff69b4;
+            border-radius: 50%;
+            animation: spin 2s linear infinite;
+        }
+
+        .ring1 { width: 150px; height: 150px; animation-delay: 0s; border-top-color: #ff69b4; }
+        .ring2 { width: 120px; height: 120px; left: 15px; top: 15px; animation-delay: -0.5s; border-top-color: #8a2be2; }
+        .ring3 { width: 90px; height: 90px; left: 30px; top: 30px; animation-delay: -1s; border-top-color: #00ffff; }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated background -->
+    <div class="anime-bg" id="animeBg"></div>
+    <div class="hex-grid"></div>
+    
+    <!-- Main button -->
+    <div class="button-container">
+        <button class="anime-cyber-button" onclick="handleAnimeClick()">
+            <!-- Animated border -->
+            <div class="loading-rings">
+                <div class="ring ring1"></div>
+                <div class="ring ring2"></div>
+                <div class="ring ring3"></div>
+            </div>
+            
+            <!-- Corner decorations -->
+            <div class="corner-deco top-left"></div>
+            <div class="corner-deco top-right"></div>
+            <div class="corner-deco bottom-left"></div>
+            <div class="corner-deco bottom-right"></div>
+            
+            <!-- Kawaii sparkles -->
+            <div class="sparkle">✨</div>
+            <div class="sparkle">⭐</div>
+            <div class="sparkle">💫</div>
+            <div class="sparkle">✨</div>
+            
+            <!-- Hearts container -->
+            <div class="hearts" id="hearts"></div>
+            
+            <span class="text" data-text="ACTIVATE">ACTIVATE</span>
+        </button>
+    </div>
+    
+    <!-- Demo information -->
+    <div class="demo-info">
+        ✨ Hover for kawaii glitch magic ✨<br>
+        💖 Click to activate anime protocol 💖
+    </div>
+
+    <script>
+        // Create floating anime icons
+        function createAnimeBackground() {
+            const bg = document.getElementById('animeBg');
+            const icons = ['⚡', '💫', '🌟', '💎', '🔮', '✨', '⭐', '💜', '💙', '🦄', '🌸', '🎌'];
+            
+            for (let i = 0; i < 25; i++) {
+                const icon = document.createElement('div');
+                icon.className = 'floating-icons';
+                icon.textContent = icons[Math.floor(Math.random() * icons.length)];
+                icon.style.left = Math.random() * 100 + '%';
+                icon.style.animationDelay = Math.random() * 8 + 's';
+                icon.style.animationDuration = (6 + Math.random() * 6) + 's';
+                icon.style.color = ['#ff69b4', '#8a2be2', '#00ffff', '#ff1493', '#00bfff'][Math.floor(Math.random() * 5)];
+                bg.appendChild(icon);
+            }
+        }
+
+        // Create floating hearts on hover
+        function createHearts() {
+            const heartsContainer = document.getElementById('hearts');
+            
+            for (let i = 0; i < 8; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.textContent = '💖';
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.animationDelay = Math.random() * 2 + 's';
+                heartsContainer.appendChild(heart);
+            }
+        }
+
+        // Handle button click with anime effects
+        function handleAnimeClick() {
+            const button = document.querySelector('.anime-cyber-button');
+            const text = button.querySelector('.text');
+            
+            // Kawaii click feedback
+            const originalText = text.textContent;
+            text.textContent = '❤️ KAWAII ❤️';
+            text.style.color = '#ff1493';
+            
+            // Create anime explosion
+            createAnimeExplosion();
+            
+            // Reset after animation
+            setTimeout(() => {
+                text.textContent = originalText;
+                text.style.color = '';
+            }, 1200);
+            
+            console.log('Anime cyberpunk button activated! ✨💖⚡');
+        }
+
+        // Anime explosion effect
+        function createAnimeExplosion() {
+            const button = document.querySelector('.anime-cyber-button');
+            const rect = button.getBoundingClientRect();
+            const icons = ['✨', '💫', '⭐', '💎', '🌟', '💖', '💜', '💙'];
+            
+            for (let i = 0; i < 16; i++) {
+                const particle = document.createElement('div');
+                particle.style.position = 'fixed';
+                particle.style.left = rect.left + rect.width/2 + 'px';
+                particle.style.top = rect.top + rect.height/2 + 'px';
+                particle.style.fontSize = '24px';
+                particle.textContent = icons[Math.floor(Math.random() * icons.length)];
+                particle.style.pointerEvents = 'none';
+                particle.style.zIndex = '1000';
+                
+                document.body.appendChild(particle);
+                
+                const angle = (i / 16) * Math.PI * 2;
+                const distance = 120 + Math.random() * 80;
+                
+                particle.animate([
+                    {
+                        transform: 'translate(0, 0) scale(1) rotate(0deg)',
+                        opacity: 1
+                    },
+                    {
+                        transform: `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px) scale(0.5) rotate(360deg)`,
+                        opacity: 0
+                    }
+                ], {
+                    duration: 800,
+                    easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                }).onfinish = () => {
+                    particle.remove();
+                };
+            }
+        }
+
+        // Screen kawaii flash
+        function triggerKawaiiFlash() {
+            document.body.style.animation = 'kawaiiFlash 0.15s ease-in-out';
+            setTimeout(() => {
+                document.body.style.animation = '';
+            }, 150);
+        }
+
+        // Add kawaii flash keyframes
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes kawaiiFlash {
+                0%, 100% { filter: brightness(1) saturate(1); }
+                50% { filter: brightness(1.3) saturate(1.8) hue-rotate(30deg); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Random kawaii screen effects
+        setInterval(() => {
+            if (Math.random() < 0.08) { // 8% chance every 3 seconds
+                triggerKawaiiFlash();
+            }
+        }, 3000);
+
+        // Enhanced hover interactions
+        document.querySelector('.anime-cyber-button').addEventListener('mouseenter', function() {
+            // Create sparkle shower
+            const button = this;
+            const rect = button.getBoundingClientRect();
+            
+            for (let i = 0; i < 12; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.style.position = 'fixed';
+                sparkle.style.left = rect.left + Math.random() * rect.width + 'px';
+                sparkle.style.top = rect.top + Math.random() * rect.height + 'px';
+                sparkle.style.fontSize = '16px';
+                sparkle.textContent = ['✨', '⭐', '💫'][Math.floor(Math.random() * 3)];
+                sparkle.style.color = ['#ff69b4', '#8a2be2', '#00ffff', '#ff1493'][Math.floor(Math.random() * 4)];
+                sparkle.style.pointerEvents = 'none';
+                sparkle.style.zIndex = '999';
+                
+                document.body.appendChild(sparkle);
+                
+                sparkle.animate([
+                    { opacity: 1, transform: 'scale(1) rotate(0deg)' },
+                    { opacity: 0, transform: 'scale(0) rotate(180deg)' }
+                ], {
+                    duration: 600,
+                    easing: 'ease-out'
+                }).onfinish = () => {
+                    sparkle.remove();
+                };
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            createAnimeBackground();
+            createHearts();
+            console.log('Anime cyberpunk button initialized! ✨🎌💖');
+        });
+
+        // Konami code easter egg
+        let konamiCode = [];
+        const konamiSequence = [
+            'ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown',
+            'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight',
+            'KeyB', 'KeyA'
+        ];
+
+        document.addEventListener('keydown', function(e) {
+            konamiCode.push(e.code);
+            if (konamiCode.length > konamiSequence.length) {
+                konamiCode.shift();
+            }
+            
+            if (JSON.stringify(konamiCode) === JSON.stringify(konamiSequence)) {
+                // Activate super kawaii mode
+                document.body.style.filter = 'saturate(2) brightness(1.2) contrast(1.1)';
+                const button = document.querySelector('.anime-cyber-button');
+                button.querySelector('.text').textContent = '🌟 KAWAII OVERLOAD 🌟';
+                
+                // Create massive sparkle explosion
+                for (let i = 0; i < 50; i++) {
+                    setTimeout(() => {
+                        createAnimeExplosion();
+                    }, i * 100);
+                }
+                
+                setTimeout(() => {
+                    document.body.style.filter = '';
+                    button.querySelector('.text').textContent = 'ACTIVATE';
+                }, 5000);
+            }
+        });
+
+        // Audio feedback (optional - uncomment to enable)
+        /*
+        function playKawaiiSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // Create kawaii sound effect
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 0.1);
+            oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.2);
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.2);
+        }
+        
+        document.querySelector('.anime-cyber-button').addEventListener('click', playKawaiiSound);
+        */
+    </script>
+</body>
+</html>
