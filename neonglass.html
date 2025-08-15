@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Neon Glass Context Menu</title>
+<style>
+/* ================= VARIABLES ================= */
+:root {
+    --hue1: 255;
+    --hue2: 222;
+    --border: 1px;
+    --border-color: hsl(var(--hue2), 12%, 20%);
+    --radius: 22px;
+    --ease: cubic-bezier(0.5, 1, 0.89, 1);
+}
+
+/* ================= MENU BASE ================= */
+#menu {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition-property: visibility, opacity, filter;
+    transition-duration: 0s, 0.25s, 0.25s;
+    transition-delay: 0.5s, 0s, 0s;
+    transition-timing-function: var(--ease);
+    filter: blur(4px);
+    font-family: 'Asap', sans-serif;
+    color: #737985;
+    position: fixed;
+    top: 140px;
+    left: 2svw;
+    min-width: 275px;
+    min-height: 275px;
+    border-radius: var(--radius);
+    border: var(--border) solid var(--border-color);
+    padding: 1em;
+    background: linear-gradient(235deg, hsl(var(--hue1) 50% 10% / 0.8), hsl(var(--hue1) 50% 10% / 0) 33%),
+                linear-gradient(45deg , hsl(var(--hue2) 50% 10% / 0.8), hsl(var(--hue2) 50% 10% / 0) 33%),
+                linear-gradient(hsl(220deg 25% 4.8% / 0.66));
+    backdrop-filter: blur(12px);
+    box-shadow: hsl(var(--hue2) 50% 2%) 0px 10px 16px -8px, hsl(var(--hue2) 50% 4%) 0px 20px 36px -14px;
+}
+#menu.open {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transition-delay: 0s;
+    filter: blur(0px); 
+}
+#menu svg {
+    fill: none;
+    stroke-width: 1;
+    height: 20px;
+}
+#menu .inner, #menu section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+#menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+#menu li {
+    padding: 0.66em;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    border-radius: calc(var(--radius) * 0.33333);
+    border: 1px solid transparent;
+    transition: all 0.3s ease-in, --item-opacity 0.3s ease-in;
+    --item-opacity: 0;
+}
+#menu li:hover, #menu li.selected {
+    --item-opacity: 0.5;
+    color: white;
+}
+
+/* ================= OTHER UI ================= */
+body {
+    background: #08090d;
+    background-image: url(https://assets.codepen.io/13471/abstract-light.jpg),
+                      linear-gradient(to right in oklab, hsl(var(--hue2) 50% 75%), hsl(var(--hue1) 50% 75%));
+    background-size: cover;
+    background-position: center;
+    background-blend-mode: hard-light;
+    margin: 0;
+}
+#app {
+    padding: 2svw;
+    min-height: 100vh;
+}
+#app > header h1, #app > header p {
+    margin: 0;
+}
+#app > footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
+}
+</style>
+</head>
+<body>
+
+<main id="app">
+    <header>
+        <h1>Neon Glass Context menu</h1>
+        <p>Right-click to open</p>
+    </header>
+    <footer class="dark">
+        <h2>Pick your own colors!</h2>
+        <input type="range" id="h1" min="0" max="360" value="255" />
+        <input type="range" id="h2" min="0" max="360" value="222" />
+    </footer>
+</main>
+
+<aside id="menu" class="open dark">
+    <div class="inner">
+        <label>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
+            <input type="text" placeholder="type a command or search" />
+        </label>
+        <section>
+            <header>Suggestions</header>
+            <ul>
+                <li class="selected">Calendar</li>
+                <li>Calculator</li>
+                <li>Messages</li>
+            </ul>
+        </section>
+        <hr>
+        <section>
+            <header>Settings</header>
+            <ul>
+                <li>Profile</li>
+                <li>Billing</li>
+            </ul>
+        </section>
+    </div>
+</aside>
+
+<a class="social-icon codepen" href="https://codepen.io/simeydotme">Made by Simey</a>
+
+<script>
+const $menu = document.getElementById('menu');
+const $li = $menu.querySelectorAll('li');
+const $hue1 = document.querySelector('#h1');
+const $hue2 = document.querySelector('#h2');
+let cleanTimer;
+
+document.addEventListener("contextmenu", (event) => {
+    const menuBox = $menu.getBoundingClientRect();
+    const bodyBox = { width: window.innerWidth, height: window.innerHeight }
+    let target = {  x: event.clientX, y: event.clientY }
+    const padding = { x: 30, y: 20 }
+    if (target.x + menuBox.width >= bodyBox.width - padding.x) target.x = bodyBox.width - menuBox.width - padding.x;
+    if (target.y + menuBox.height >= bodyBox.height - padding.y) target.y = bodyBox.height - menuBox.height - padding.y;
+    const isMenu = $menu.contains(event.target);
+    event.preventDefault();
+    if (!isMenu) {
+        $menu.style.left = target.x + 'px';
+        $menu.style.top = target.y + 'px';
+        $menu.classList.add('open');
+        clearTimeout(cleanTimer);
+    }
+});
+
+document.addEventListener('pointerdown', (event) => {
+    const $target = event.target;
+    const isMenu = $menu.contains($target);
+    const isSlider = $target.matches('input');
+    if (!isMenu && !isSlider) {
+        $menu.classList.remove('open');
+        cleanTimer = setTimeout(() => { 
+            $menu.querySelector('input').value = ''; 
+            $li.forEach($el => $el.classList.remove('selected'));
+        }, 200);
+    } else if (isMenu) {
+        $li.forEach($el => $el.classList.remove('selected'));
+        if ($target.matches('li')) $target.classList.add('selected');
+    }
+});
+
+$hue1.addEventListener('input', (event) => {
+    document.body.style.setProperty('--hue1', event.target.value);
+    $menu.classList.add('open');
+});
+$hue2.addEventListener('input', (event) => {
+    document.body.style.setProperty('--hue2', event.target.value);
+    $menu.classList.add('open');
+});
+
+const rand1 = 120 + Math.floor(Math.random() * 240);
+const rand2 = rand1 - 80 + (Math.floor(Math.random() * 60) - 30);
+$hue1.value = rand1;
+$hue2.value = rand2;
+document.body.style.setProperty('--hue1', rand1);
+document.body.style.setProperty('--hue2', rand2);
+</script>
+
+</body>
+</html>
