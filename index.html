@@ -18,7 +18,7 @@
     #livePreview {
       position: relative;
       width: 100%;
-      height: 500px;
+      height: 610px;
       border: none;
       background: white;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
@@ -185,18 +185,18 @@
       let i = 0;
       let currentCode = "";
 
-      const iframeDoc = livePreview.contentDocument || livePreview.contentWindow.document;
-      iframeDoc.open();
-      iframeDoc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body></body></html>`);
-      iframeDoc.close();
-
       // Check if it's a complete HTML document or just a fragment
       const isCompleteDocument = fullCode.includes('<!DOCTYPE html>') || 
                                 (fullCode.includes('<html') && fullCode.includes('<body'));
 
-      // PRE-ANALYZE CSS and categorize into stages
+      // Check if code contains ES6 modules or import maps (like Three.js code)
+      const hasModules = fullCode.includes('import ') || fullCode.includes('type="module"') || fullCode.includes('type="importmap"');
+
+      // PRE-ANALYZE and extract content
       let finalHtml = '';
       let finalCss = '';
+      let finalScript = '';
+      let importMap = '';
       let stage1Css = ''; // Basic layout (display, position, width, height, margin, padding, flex)
       let stage2Css = ''; // Colors/effects (background, color, border, box-shadow, text-shadow)
       let stage3Css = ''; // Animations/hover (transition, transform, animation, hover states)
@@ -207,11 +207,51 @@
         finalHtml = bodyMatch ? bodyMatch[1] : '';
         finalCss = styleMatch ? styleMatch[1] : '';
       } else {
-        const htmlContent = fullCode.match(/^[\s\S]*?(?=<style|$)/);
-        const styleContent = fullCode.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
-        finalHtml = htmlContent ? htmlContent[0].replace(/<style[\s\S]*?<\/style>/i, '').trim() : '';
+        // Extract import map if present
+        const importMapMatch = fullCode.match(/<script type="importmap"[^>]*>([\s\S]*?)<\/script>/i);
+        if (importMapMatch) {
+          importMap = importMapMatch[0];
+        }
+
+        // Extract module scripts
+        const moduleScriptMatch = fullCode.match(/<script type="module"[^>]*>([\s\S]*?)<\/script>/i);
+        finalScript = moduleScriptMatch ? moduleScriptMatch[1] : '';
+
+        // Extract HTML content - everything between script tags
+        let tempContent = fullCode;
+        // Remove import map
+        tempContent = tempContent.replace(/<script type="importmap"[^>]*>[\s\S]*?<\/script>/gi, '');
+        // Remove module scripts
+        tempContent = tempContent.replace(/<script type="module"[^>]*>[\s\S]*?<\/script>/gi, '');
+        // Remove style tags for separate processing
+        const styleContent = tempContent.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
         finalCss = styleContent ? styleContent[1] : '';
+        tempContent = tempContent.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+        
+        // Clean up and get the HTML content
+        finalHtml = tempContent.trim();
+        
+        console.log('Content extraction complete:');
+        console.log('- HTML length:', finalHtml.length);
+        console.log('- CSS length:', finalCss.length);
+        console.log('- Script length:', finalScript.length);
+        console.log('- Import map:', importMap ? 'Present' : 'Missing');
       }
+
+      const iframeDoc = livePreview.contentDocument || livePreview.contentWindow.document;
+      iframeDoc.open();
+      
+      // Create basic HTML structure with proper module support
+      let iframeContent = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">`;
+      
+      // Add import map first if present (critical for Three.js modules)
+      if (importMap) {
+        iframeContent += importMap;
+      }
+      
+      iframeContent += `</head><body></body></html>`;
+      iframeDoc.write(iframeContent);
+      iframeDoc.close();
 
       // Categorize CSS properties into stages
       function categorizeCSS(cssText) {
@@ -295,14 +335,23 @@
       // Pre-load HTML (Stage 1: Reveal HTML structure)
       if (finalHtml) {
         iframeDoc.body.innerHTML = finalHtml;
+        console.log('HTML content loaded into iframe body');
         
-        // NEW: Hide all elements initially
-        const allElements = iframeDoc.body.querySelectorAll('*');
-        allElements.forEach(el => {
-          el.style.opacity = '0';
-          el.style.transition = 'opacity 0.5s ease';
-        });
-        console.log(`Hidden ${allElements.length} elements initially`);
+        // For module-based apps, ensure DOM is ready before any scripts
+        if (hasModules) {
+          // Force iframe document to complete loading
+          setTimeout(() => {
+            console.log('Iframe DOM should be ready for module execution');
+          }, 100);
+        } else {
+          // NEW: Hide all elements initially for non-module apps
+          const allElements = iframeDoc.body.querySelectorAll('*');
+          allElements.forEach(el => {
+            el.style.opacity = '0';
+            el.style.transition = 'opacity 0.5s ease';
+          });
+          console.log(`Hidden ${allElements.length} elements initially`);
+        }
       }
 
       let htmlRevealed = false;
@@ -312,6 +361,13 @@
       let elementRevealIndex = 0; // NEW: Track which element to reveal next
 
       function updatePreview(justTypedChar) {
+        // For module-based code, skip progressive updates - we'll reload fresh at the end!
+        if (hasModules) {
+          // Just show typing animation, actual rendering happens after completion
+          return;
+        }
+
+        // Original progressive behavior for non-module code
         // NEW: Reveal next element when > is typed
         if (justTypedChar === '>') {
           const allElements = iframeDoc.body.querySelectorAll('*');
@@ -323,7 +379,7 @@
           }
         }
 
-        // NEW: Apply CSS stages when } is typed
+        // NEW: Apply CSS stages when } is typed (for non-module code)
         if (justTypedChar === '}') {
           console.log('CSS rule completed with }');
           const progress = currentCode.length / fullCode.length;
@@ -344,13 +400,13 @@
           }
         }
 
-        // Ensure HTML structure is revealed when first > appears
+        // Ensure HTML structure is revealed when first > appears (for non-module code)
         if (justTypedChar === '>' && !htmlRevealed) {
           htmlRevealed = true;
           console.log('Stage 1: HTML Structure Revealed');
         }
 
-        // Handle JavaScript execution
+        // Handle JavaScript execution (for non-module code)
         const scriptMatches = currentCode.match(/<script[^>]*>([\s\S]*?)<\/script>/gi);
         if (scriptMatches) {
           const existingScripts = iframeDoc.querySelectorAll('script[data-typed="true"]');
@@ -358,7 +414,7 @@
           
           scriptMatches.forEach(scriptTag => {
             const content = scriptTag.match(/<script[^>]*>([\s\S]*?)<\/script>/i);
-            if (content && content[1]) {
+            if (content && content[1] && !content[0].includes('type="module"') && !content[0].includes('type="importmap"')) {
               const newScript = iframeDoc.createElement('script');
               newScript.setAttribute('data-typed', 'true');
               newScript.textContent = content[1];
@@ -392,23 +448,48 @@
           // Update preview - pass the character that was just typed
           updatePreview(char);
 
-          setTimeout(typeNextChar, .1);
+          setTimeout(typeNextChar, hasModules ? 3 : 0.1);
         } else {
           // Typing complete - ensure all stages are applied
-          if (!htmlRevealed) {
-            console.log('Final: HTML Structure Revealed');
-          }
-          if (!layoutApplied) {
-            stage1Style.textContent = stage1Css;
-            console.log('Final: Basic Layout Applied');
-          }
-          if (!colorsApplied) {
-            stage2Style.textContent = stage2Css;
-            console.log('Final: Colors/Effects Applied');
-          }
-          if (!effectsApplied) {
-            stage3Style.textContent = stage3Css;
-            console.log('Final: Animations/Hover Effects Applied');
+          console.log('Typing complete!');
+          
+          if (hasModules) {
+            // BRILLIANT USER IDEA: After typing completes, reload the FULL original content!
+            console.log('🎯 USER SOLUTION: Reloading original Galaxy.html content after typing...');
+            
+            setTimeout(() => {
+              console.log('🔄 Starting fresh iframe reload...');
+              
+              // COMPLETELY reload the iframe with the ORIGINAL Galaxy.html content
+              const newIframeDoc = livePreview.contentDocument || livePreview.contentWindow.document;
+              newIframeDoc.open();
+              
+              // Write the EXACT original content using the PROVEN method from debug test
+              const originalHTML = `<!DOCTYPE html><html><head>${fullCode}</head><body></body></html>`;
+              
+              console.log('📝 Writing HTML content of length:', originalHTML.length);
+              newIframeDoc.write(originalHTML);
+              newIframeDoc.close();
+              console.log('🌟 ORIGINAL CONTENT RELOAD COMPLETE - Galaxy should now render!');
+            }, 1000); // Wait 1 second after typing completes
+            
+          } else {
+            // For regular code, ensure all stages are applied
+            if (!htmlRevealed) {
+              console.log('Final: HTML Structure Revealed');
+            }
+            if (!layoutApplied) {
+              stage1Style.textContent = stage1Css;
+              console.log('Final: Basic Layout Applied');
+            }
+            if (!colorsApplied) {
+              stage2Style.textContent = stage2Css;
+              console.log('Final: Colors/Effects Applied');
+            }
+            if (!effectsApplied) {
+              stage3Style.textContent = stage3Css;
+              console.log('Final: Animations/Hover Effects Applied');
+            }
           }
         }
       }
