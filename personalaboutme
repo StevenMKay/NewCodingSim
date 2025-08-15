@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mariam – Portfolio (Inlined + Team Carousel)</title>
+<style>
+/* ---------------------------
+   Core Variables + Reset
+----------------------------*/
+@font-face{
+  font-family:Poppins;
+  src:local("Poppins");
+}
+:root{
+  --hue-color: 242;
+  --skin-color: hsl(342, 92%, 46%);
+  --title-color: hsl(var(--hue-color), 8%, 95%);
+  --text-color: hsl(var(--hue-color), 8%, 85%);
+  --body-color: hsl(var(--hue-color), 19%, 6%);
+  --box-color: hsl(var(--hue-color), 14%, 14%);
+  --scroll-box-color: hsl(var(--hue-color), 12%, 10%);
+  --scroll-thumb-color: hsl(var(--hue-color), 12%, 25%);
+  --mirage-color: hsl(var(--hue-color), 12%, 12%);
+
+  --font-bold: 700;
+  --font-medium: 600;
+
+  --biggest-font-size: 2.5rem;
+  --h1-font-size: 1.75rem;
+  --h2-font-size: 1.25rem;
+  --h3-font-size: 1rem;
+  --normal-font-size: .938rem;
+  --small-font-size: .813rem;
+  --smaller-font-size: .75rem;
+
+  --mb025:.25rem; --mb05:.5rem; --mb075:.75rem; --mb1:1rem; --mb15:1.5rem; --mb2:2rem; --mb25:2.5rem; --mb3:3rem;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family: Poppins, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: var(--body-color);
+  color: var(--text-color);
+  line-height: 1.6;
+}
+a{color:inherit;text-decoration:none}
+ul{list-style:none}
+img{display:block;max-width:100%}
+
+/* ---------------------------
+   Layout + Utilities
+----------------------------*/
+.container{max-width:1100px;margin:0 auto;padding:0 1rem}
+.grid{display:grid;gap:1.25rem}
+.section{padding:6.5rem 0 2rem}
+.section-title{
+  text-align:center;font-size:var(--h1-font-size);margin-bottom:var(--mb3)
+}
+.section-title::before{
+  content:attr(data-heading);display:block;font-size:var(--normal-font-size);
+  font-weight:var(--font-medium);color:var(--skin-color);opacity:.9;margin-bottom:.25rem
+}
+.button{
+  display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1rem;
+  background:transparent;color:var(--title-color);border:1px solid var(--skin-color);
+  border-radius:.5rem;position:relative;overflow:hidden;transition:.3s
+}
+.button::after{
+  content:"";position:absolute;inset:0;background:var(--mirage-color);
+  transform:scale(0);transform-origin:center;border-radius:.25rem;transition:.3s;z-index:-1
+}
+.button:hover{transform:translateY(-1px)}
+.button:hover::after{transform:scale(1)}
+
+/* ---------------------------
+   Sidebar / Nav
+----------------------------*/
+.sidebar{
+  position:fixed;inset:0 0 0 auto;width:100px;height:100vh;background:var(--body-color);
+  border-right:1px solid var(--box-color);z-index:999
+}
+.nav{height:100%}
+.nav-logo{position:absolute;left:0;right:0;top:1.8rem;width:40px;height:40px;margin:auto;border-radius:50%;background:var(--skin-color);display:grid;place-items:center}
+.nav-logo-text{color:#fff;font-weight:800}
+.nav-menu{position:fixed;transform:rotate(-90deg) translateX(-100%);transform-origin:left top;width:100vh}
+.menu{display:flex}
+.nav-list{display:flex;flex-direction:row-reverse;margin:-2px auto 0}
+.nav-link{
+  height:100%;line-height:100px;padding:0 1rem;color:var(--title-color);
+  font-weight:var(--font-medium);position:relative;transition:.3s
+}
+.nav-link:hover,.nav-link.active-link{color:var(--skin-color)}
+.nav-link:hover::after,.nav-link.active-link::after{
+  content:"";position:absolute;width:6px;height:6px;background:var(--skin-color);
+  border-radius:50%;left:0;right:0;bottom:1.8rem;margin:auto
+}
+.nav-toggle{
+  height:32px;width:36px;cursor:pointer;position:fixed;right:1.5rem;top:2rem;
+  font-size:1.1rem;border-radius:.25rem;background:var(--skin-color);
+  color:#fff;display:none;justify-content:center;align-items:center;z-index:1000
+}
+.nav-close{display:none}
+.btn-share{position:absolute;bottom:1.8rem;left:0;right:0;text-align:center}
+
+/* ---------------------------
+   Main sections
+----------------------------*/
+main{margin-left:100px}
+
+/* Home */
+.home{
+  background:url('https://i.postimg.cc/DZxD1xGL/home-bg.jpg') center/cover no-repeat;
+  height:100vh;
+}
+.home-container{position:relative;height:100%;align-items:center}
+.home-social{position:absolute;top:1.8rem;left:0;display:flex;align-items:center;gap:3.5rem}
+.home-social-follow{font-weight:var(--font-medium);position:relative}
+.home-social-follow::after{content:"";position:absolute;width:1rem;height:2px;background:var(--text-color);right:-45%;top:50%}
+.home-social-links{display:inline-flex;gap:1rem}
+.home-img{width:420px;filter:drop-shadow(0 10px 30px rgba(0,0,0,.4))}
+.home-title{font-size:var(--biggest-font-size);color:#fff}
+.home-subtitle{font-size:var(--h3-font-size);font-weight:var(--font-medium);margin-bottom:var(--mb075);color:#fff}
+.home-description{max-width:460px;margin-bottom:var(--mb2)}
+
+/* About */
+.about-container{grid-template-columns:repeat(2,1fr);gap:4rem;align-items:center}
+.about-img{width:480px;border-radius:.75rem;justify-self:center}
+.about-heading{font-size:var(--h3-font-size);margin-bottom:var(--mb075)}
+.about-description{text-align:justify;padding-right:2rem;margin-bottom:var(--mb2)}
+.about-info{display:grid;grid-template-columns:repeat(3,140px);gap:.5rem;margin-bottom:var(--mb3)}
+.about-box{background:var(--box-color);text-align:center;border-radius:.25rem;padding:1rem 1.25rem}
+.about-icon{font-size:1.2rem;color:var(--skin-color);margin-bottom:.5rem}
+.about-title{font-size:var(--small-font-size)}
+.about-subtitle{font-size:var(--smaller-font-size);opacity:.85}
+
+/* Skills */
+.skills-container{grid-template-columns:360px 320px;gap:3rem;justify-content:center}
+.skills-header{display:flex;align-items:center;cursor:pointer}
+.skills-header:not(:last-child){margin-bottom:var(--mb25)}
+.skills-icon,.skills-arrow{font-size:1.25rem;color:var(--skin-color)}
+.skills-icon{margin-right:.75rem}
+.skills-arrow{margin-left:auto;transition:.3s}
+.skills-active .skills-arrow{transform:rotate(-90deg)}
+.skills-title{font-size:var(--h3-font-size);font-weight:var(--font-medium)}
+.skills-subtitle{font-size:var(--small-font-size);opacity:.9}
+.skills-list{gap:1.2rem}
+.skills-titles{display:flex;justify-content:space-between;margin-bottom:.5rem}
+.skills-name{font-size:var(--normal-font-size);font-weight:var(--font-medium)}
+.skills-bar,.skills-percentage{height:5px;border-radius:.25rem}
+.skills-bar{background:var(--box-color)}
+.skills-percentage{display:block;background:var(--skin-color)}
+.skills [data-content]{display:none}
+.skills-active[data-content]{display:block}
+
+/* Work (cards only to keep brief) */
+.work-container{grid-template-columns:repeat(3, minmax(220px, 1fr));gap:1.25rem;justify-content:center;padding-top:1rem}
+.work-card{background:var(--box-color);padding:1rem;border-radius:.5rem}
+.work-img{border-radius:.5rem;margin-bottom:.75rem}
+.work-title{font-weight:var(--font-medium);margin-bottom:.25rem}
+.work-button{color:var(--skin-color);font-size:.9rem;display:inline-flex;align-items:center;gap:.25rem;cursor:pointer}
+.work-button:hover .work-button-icon{transform:translateX(.25rem);transition:.3s}
+
+/* Services (modal animation kept) */
+.services-container{grid-template-columns:repeat(3, minmax(220px,1fr));gap:1.25rem}
+.services-content{background:var(--box-color);padding:1.25rem;border-radius:.5rem;position:relative}
+.services-title{margin-top:.25rem}
+.services-button{margin-top:.75rem;display:inline-flex;align-items:center;gap:.35rem;cursor:pointer;color:var(--skin-color)}
+.services-modal{position:fixed;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:.3s}
+.services-modal.active-modal{opacity:1;pointer-events:all}
+.services-modal-content{background:var(--body-color);border:1px solid var(--box-color);padding:1.25rem;border-radius:.75rem;max-width:540px;width:92%;transform:translateY(15px);animation:pop .35s ease forwards}
+@keyframes pop{to{transform:translateY(0)}}
+.services-modal-title{margin-bottom:.5rem}
+.services-modal-services{gap:.75rem}
+.services-modal-service{display:flex;align-items:center;gap:.5rem}
+
+/* Contact (inputs with focus animation) */
+.contact-container{grid-template-columns:repeat(2, minmax(260px, 1fr));gap:1.5rem}
+.contact-card{background:var(--box-color);padding:1rem;border-radius:.5rem;margin-bottom:.75rem}
+.input-container{position:relative;margin-top:1rem}
+.input{width:100%;padding:1rem;border:1px solid var(--box-color);background:transparent;color:var(--title-color);border-radius:.5rem;outline:none}
+.input-container label{
+  position:absolute;left:1rem;top:50%;transform:translateY(-50%);transition:.25s;opacity:.7
+}
+.input-container.focus label,
+.input:not(:placeholder-shown) + label{
+  top:.15rem;transform:none;font-size:.75rem;opacity:.95;color:var(--skin-color)
+}
+
+/* Footer */
+.footer{padding:2rem 0;border-top:1px solid var(--box-color);margin-top:2rem}
+.footer-links{display:inline-block;opacity:.9}
+.footer-socials{display:flex;gap:.75rem;justify-content:center;margin-top:.75rem}
+.footer-copy{text-align:center;opacity:.7;margin-top:1rem}
+
+/* ---------------------------
+   OUR TEAM Carousel (3D)
+----------------------------*/
+.team-wrap{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.about-title.team-big{
+  font-size: clamp(2.5rem, 8vw, 7.5rem);
+  font-weight:900;text-transform:uppercase;letter-spacing:-.02em;
+  pointer-events:none;white-space:nowrap;
+  font-family: "Arial Black","Arial Bold",Arial,sans-serif;
+  background: linear-gradient(to bottom, rgb(8 42 123 / 35%) 30%, rgb(255 255 255 / 0%) 76%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  margin-bottom:1rem
+}
+.carousel-container{
+  width:100%;max-width:1200px;height:450px;position:relative;perspective:1000px;margin-top:.5rem
+}
+.carousel-track{
+  width:100%;height:100%;display:flex;justify-content:center;align-items:center;position:relative;
+  transform-style:preserve-3d;transition:transform .8s cubic-bezier(.25,.46,.45,.94)
+}
+.card{
+  position:absolute;width:280px;height:380px;background:#fff;border-radius:20px;overflow:hidden;cursor:pointer;
+  box-shadow:0 20px 40px rgba(0,0,0,.15);
+  transition:all .8s cubic-bezier(.25,.46,.45,.94)
+}
+.card img{width:100%;height:100%;object-fit:cover;transition:all .8s cubic-bezier(.25,.46,.45,.94)}
+.card.center{z-index:10;transform:scale(1.1) translateZ(0)}
+.card.left-2{z-index:1;transform:translateX(-400px) scale(.8) translateZ(-300px);opacity:.7}
+.card.left-1{z-index:5;transform:translateX(-200px) scale(.9) translateZ(-100px);opacity:.9}
+.card.right-1{z-index:5;transform:translateX(200px) scale(.9) translateZ(-100px);opacity:.9}
+.card.right-2{z-index:1;transform:translateX(400px) scale(.8) translateZ(-300px);opacity:.7}
+.card.left-1 img,.card.left-2 img,.card.right-1 img,.card.right-2 img{filter:grayscale(100%)}
+.card.hidden{opacity:0;pointer-events:none}
+.member-info{text-align:center;margin-top:1.25rem;transition:all .5s ease-out}
+.member-name{color:rgb(8,42,123);font-size:2rem;font-weight:700;margin-bottom:.25rem;position:relative;display:inline-block}
+.member-name::before,.member-name::after{content:"";position:absolute;top:100%;width:60px;height:2px;background:rgb(8,42,123)}
+.member-name::before{left:-75px}.member-name::after{right:-75px}
+.member-role{color:#848696;font-size:1.1rem;font-weight:600;opacity:.85;text-transform:uppercase;letter-spacing:.12em;margin-top:-6px}
+.dots{display:flex;justify-content:center;gap:10px;margin-top:22px}
+.dot{width:12px;height:12px;border-radius:50%;background:rgba(8,42,123,.2);cursor:pointer;transition:all .3s}
+.dot.active{background:rgb(8,42,123);transform:scale(1.15)}
+.nav-arrow{
+  position:absolute;top:50%;transform:translateY(-50%);background:rgba(8,42,123,.6);color:#fff;width:40px;height:40px;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:20;transition:.3s;
+  font-size:1.5rem;border:none;outline:none;padding-bottom:4px
+}
+.nav-arrow:hover{background:rgba(0,0,0,.8);transform:translateY(-50%) scale(1.08)}
+.nav-arrow.left{left:20px;padding-right:3px}
+.nav-arrow.right{right:20px;padding-left:3px}
+
+/* ---------------------------
+   Responsive
+----------------------------*/
+@media (max-width:1024px){
+  .about-container{grid-template-columns:1fr}
+}
+@media (max-width:768px){
+  .nav-toggle{display:flex}
+  .sidebar{transform:translateX(-100%);transition:.35s}
+  .sidebar.show-sidebar{transform:translateX(0)}
+  .nav-menu{display:none}
+  main{margin-left:0}
+  .home-img{width:300px}
+  .about-img{width:320px}
+  .services-container,.work-container,.contact-container{grid-template-columns:1fr}
+  /* team */
+  .card{width:200px;height:280px}
+  .card.left-2{transform:translateX(-250px) scale(.8) translateZ(-300px)}
+  .card.left-1{transform:translateX(-120px) scale(.9) translateZ(-100px)}
+  .card.right-1{transform:translateX(120px) scale(.9) translateZ(-100px)}
+  .card.right-2{transform:translateX(250px) scale(.8) translateZ(-300px)}
+  .member-name{font-size:1.5rem}
+  .member-name::before,.member-name::after{width:40px}
+  .member-name::before{left:-55px}.member-name::after{right:-55px}
+}
+::-webkit-scrollbar{width:.6rem;background:var(--scroll-box-color);border-radius:.5rem}
+::-webkit-scrollbar-thumb{background:var(--scroll-thumb-color);border-radius:.5rem}
+</style>
+</head>
+<body>
+
+<!-- Mobile toggle -->
+<div class="nav-toggle" id="nav-toggle">☰</div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <nav class="nav">
+    <div class="nav-logo"><span class="nav-logo-text">M</span></div>
+    <div class="nav-menu">
+      <div class="menu">
+        <ul class="nav-list">
+          <li class="nav-item"><a href="#home" class="nav-link active-link">Home</a></li>
+          <li class="nav-item"><a href="#about" class="nav-link">About</a></li>
+          <li class="nav-item"><a href="#skills" class="nav-link">Skills</a></li>
+          <li class="nav-item"><a href="#work" class="nav-link">Work</a></li>
+          <li class="nav-item"><a href="#services" class="nav-link">Services</a></li>
+          <li class="nav-item"><a href="#team" class="nav-link">Our Team</a></li>
+          <li class="nav-item"><a href="#contact" class="nav-link">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="btn-share">• • •</div>
+    <div class="nav-close" id="nav-close">✕</div>
+  </nav>
+</aside>
+
+<main class="main">
+
+  <!-- HOME -->
+  <section class="home" id="home">
+    <div class="home-container container grid" style="grid-template-columns: 1.2fr .8fr;">
+      <div class="home-social">
+        <span class="home-social-follow">Follow Me</span>
+        <div class="home-social-links">
+          <a href="https://www.facebook.com" target="_blank">Fb</a>
+          <a href="https://www.instagram.com" target="_blank">Ig</a>
+          <a href="https://www.x.com" target="_blank">X</a>
+        </div>
+      </div>
+
+      <!-- Your local profile photo path -->
+      <img class="home-img" alt="Profile"
+           src="C:\Users\Pereg\OneDrive\Pictures\Steven\Adult\Better Self Portrait No Background.png"/>
+
+      <div class="home-data">
+        <h1 class="home-title">Hi, I'm Mariam</h1>
+        <h3 class="home-subtitle">Frontend Developer</h3>
+        <p class="home-description">I have high level experience in web design, development knowledge and producing quality work.</p>
+        <a href="#about" class="button">More About me!</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="about section" id="about">
+    <h2 class="section-title" data-heading="My Intro">About Me</h2>
+    <div class="about-container container grid">
+      <img class="about-img" alt="About" src="https://i.postimg.cc/3NgvPcZD/home-img.png"/>
+      <div>
+        <h3 class="about-heading">Hi, I'm Mariam</h3>
+        <p class="about-description">
+          Frontend developer focused on clean UI, smooth micro-interactions, and accessible user journeys.
+          I love turning ideas into delightful, performant web experiences.
+        </p>
+        <div class="about-info">
+          <div class="about-box"><div class="about-icon">★</div><h3 class="about-title">Projects</h3><span class="about-subtitle">25+ Done</span></div>
+          <div class="about-box"><div class="about-icon">⚡</div><h3 class="about-title">Experience</h3><span class="about-subtitle">3+ Years</span></div>
+          <div class="about-box"><div class="about-icon">❤</div><h3 class="about-title">Clients</h3><span class="about-subtitle">Happy</span></div>
+        </div>
+        <a href="#contact" class="button">Contact Me</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section class="skills section" id="skills">
+    <h2 class="section-title" data-heading="My Abilities">Skills</h2>
+    <div class="skills-container container grid">
+      <div class="skills-header">
+        <span class="skills-icon">🧰</span>
+        <div>
+          <h3 class="skills-title">Frontend</h3>
+          <span class="skills-subtitle">More than 2 years</span>
+        </div>
+        <span class="skills-arrow">▾</span>
+      </div>
+
+      <div class="skills-content">
+        <div class="skills-group skills-active" data-content id="frontend">
+          <div class="skills-list grid">
+            <div class="skills-data">
+              <div class="skills-titles"><h3 class="skills-name">HTML</h3><span class="skills-number">90%</span></div>
+              <div class="skills-bar"><span class="skills-percentage" style="width:90%"></span></div>
+            </div>
+            <div class="skills-data">
+              <div class="skills-titles"><h3 class="skills-name">CSS</h3><span class="skills-number">80%</span></div>
+              <div class="skills-bar"><span class="skills-percentage" style="width:80%"></span></div>
+            </div>
+            <div class="skills-data">
+              <div class="skills-titles"><h3 class="skills-name">JavaScript</h3><span class="skills-number">70%</span></div>
+              <div class="skills-bar"><span class="skills-percentage" style="width:70%"></span></div>
+            </div>
+            <div class="skills-data">
+              <div class="skills-titles"><h3 class="skills-name">React</h3><span class="skills-number">85%</span></div>
+              <div class="skills-bar"><span class="skills-percentage" style="width:85%"></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WORK (sample) -->
+  <section class="work section" id="work">
+    <h2 class="section-title" data-heading="My Portfolio">Work</h2>
+    <div class="work-container container">
+      <article class="work-card">
+        <img class="work-img" src="https://i.postimg.cc/sXLjnC5p/work-2.png" alt="App UI"/>
+        <h3 class="work-title">App for Technology & Services</h3>
+        <span class="work-button">Details <span class="work-button-icon">→</span></span>
+      </article>
+      <article class="work-card">
+        <img class="work-img" src="https://i.postimg.cc/3wGg2qBP/work-4.png" alt="Food App"/>
+        <h3 class="work-title">Food ordering experience</h3>
+        <span class="work-button">Details <span class="work-button-icon">→</span></span>
+      </article>
+      <article class="work-card">
+        <img class="work-img" src="https://i.postimg.cc/zG9ctwH7/work-1.png" alt="Dashboard"/>
+        <h3 class="work-title">Analytics Dashboard</h3>
+        <span class="work-button">Details <span class="work-button-icon">→</span></span>
+      </article>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="services section" id="services">
+    <h2 class="section-title" data-heading="Services">What I Offer</h2>
+
+    <div class="services-container container grid">
+      <div class="services-content">
+        <div>
+          <h3 class="services-title">Web <br/> Designer</h3>
+        </div>
+        <span class="services-button">View More →</span>
+        <div class="services-modal">
+          <div class="services-modal-content">
+            <span class="services-modal-close" style="cursor:pointer">✕</span>
+            <h3 class="services-modal-title">Web Designer</h3>
+            <p class="services-modal-description">3+ years building fast, responsive sites.</p>
+            <ul class="services-modal-services grid">
+              <li class="services-modal-service">✔ User Interface Development</li>
+              <li class="services-modal-service">✔ Web Page Development</li>
+              <li class="services-modal-service">✔ Interactive UX/UI Creations</li>
+              <li class="services-modal-service">✔ Brand Positioning</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="services-content">
+        <div>
+          <h3 class="services-title">UI/UX <br/> Designer</h3>
+        </div>
+        <span class="services-button">View More →</span>
+        <div class="services-modal">
+          <div class="services-modal-content">
+            <span class="services-modal-close" style="cursor:pointer">✕</span>
+            <h3 class="services-modal-title">UI/UX Designer</h3>
+            <p class="services-modal-description">5+ years delivering research-driven designs.</p>
+            <ul class="services-modal-services grid">
+              <li class="services-modal-service">✔ Wireframes & Prototypes</li>
+              <li class="services-modal-service">✔ Usability Testing</li>
+              <li class="services-modal-service">✔ Accessibility & A/B Testing</li>
+              <li class="services-modal-service">✔ Presentations & Workshops</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="services-content">
+        <div>
+          <h3 class="services-title">Branding <br/> Designer</h3>
+        </div>
+        <span class="services-button">View More →</span>
+        <div class="services-modal">
+          <div class="services-modal-content">
+            <span class="services-modal-close" style="cursor:pointer">✕</span>
+            <h3 class="services-modal-title">Branding</h3>
+            <p class="services-modal-description">Identity systems that feel cohesive and memorable.</p>
+            <ul class="services-modal-services grid">
+              <li class="services-modal-service">✔ Logo Systems</li>
+              <li class="services-modal-service">✔ Design Systems</li>
+              <li class="services-modal-service">✔ Marketing Collateral</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OUR TEAM (3D Carousel) -->
+  <section class="section" id="team">
+    <div class="team-wrap container">
+      <h1 class="about-title team-big">OUR TEAM</h1>
+
+      <div class="carousel-container">
+        <button class="nav-arrow left">‹</button>
+        <div class="carousel-track">
+          <div class="card" data-index="0">
+            <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=1200&auto=format&fit=crop" alt="Team Member 1"/>
+          </div>
+          <div class="card" data-index="1">
+            <img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=1200&auto=format&fit=crop" alt="Team Member 2"/>
+          </div>
+          <div class="card" data-index="2">
+            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=1200&auto=format&fit=crop&q=60" alt="Team Member 3"/>
+          </div>
+          <div class="card" data-index="3">
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=1200&auto=format&fit=crop&q=60" alt="Team Member 4"/>
+          </div>
+          <div class="card" data-index="4">
+            <img src="https://images.unsplash.com/photo-1655249481446-25d575f1c054?w=1200&auto=format&fit=crop&q=60" alt="Team Member 5"/>
+          </div>
+          <div class="card" data-index="5">
+            <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=1200&auto=format&fit=crop" alt="Team Member 6"/>
+          </div>
+        </div>
+        <button class="nav-arrow right">›</button>
+      </div>
+
+      <div class="member-info">
+        <h2 class="member-name">Emily Kim</h2>
+        <p class="member-role">Founder</p>
+      </div>
+
+      <div class="dots">
+        <div class="dot active" data-index="0"></div>
+        <div class="dot" data-index="1"></div>
+        <div class="dot" data-index="2"></div>
+        <div class="dot" data-index="3"></div>
+        <div class="dot" data-index="4"></div>
+        <div class="dot" data-index="5"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact section" id="contact">
+    <h2 class="section-title" data-heading="Get in Touch">Contact me</h2>
+    <div class="contact-container container grid">
+      <div>
+        <div class="contact-card"><h3 class="contact-card-title">Email</h3><span class="contact-card-data">user@gmail.com</span></div>
+        <div class="contact-card"><h3 class="contact-card-title">Whatsapp</h3><span class="contact-card-data">999-888-777</span></div>
+        <div class="contact-card"><h3 class="contact-card-title">Messenger</h3><span class="contact-card-data">@mariam.dev</span></div>
+      </div>
+      <form class="grid">
+        <div class="input-container">
+          <input class="input" type="text" placeholder=" " id="name"/>
+          <label for="name">Your Name</label>
+        </div>
+        <div class="input-container">
+          <input class="input" type="email" placeholder=" " id="email"/>
+          <label for="email">Your Email</label>
+        </div>
+        <div class="input-container">
+          <input class="input" type="text" placeholder=" " id="subject"/>
+          <label for="subject">Subject</label>
+        </div>
+        <div class="input-container">
+          <textarea class="input" placeholder=" " rows="5" id="message"></textarea>
+          <label for="message">Message</label>
+        </div>
+        <button class="button" type="submit">Send Message</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container" style="text-align:center">
+      <ul class="footer-links" style="display:flex;gap:1rem;justify-content:center">
+        <li><a href="#services" class="footer-links">Services</a></li>
+        <li><a href="#work" class="footer-links">Work</a></li>
+        <li><a href="#contact" class="footer-links">Contact</a></li>
+      </ul>
+      <div class="footer-socials">
+        <a href="https://www.facebook.com" target="_blank">Fb</a>
+        <a href="https://www.instagram.com" target="_blank">Ig</a>
+        <a href="https://www.x.com" target="_blank">X</a>
+      </div>
+      <p class="footer-copy">© ULTRA CODE. All rights reserved</p>
+    </div>
+  </footer>
+
+</main>
+
+<script>
+/* ---------------------------
+   Sidebar Toggle + Active Links
+----------------------------*/
+const navMenu = document.getElementById('sidebar');
+const navToggle = document.getElementById('nav-toggle');
+if (navToggle){ navToggle.addEventListener('click',()=>navMenu.classList.toggle('show-sidebar')); }
+
+const sections = document.querySelectorAll('section[id]');
+window.addEventListener('scroll', ()=>{
+  const scrollY = window.pageYOffset;
+  sections.forEach(current=>{
+    const sectionHeight = current.offsetHeight;
+    const sectionTop = current.offsetTop - 60;
+    const id = current.getAttribute('id');
+    const link = document.querySelector('.nav-list a[href*=' + id + ']');
+    if(!link) return;
+    if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight){
+      link.classList.add('active-link');
+    } else {
+      link.classList.remove('active-link');
+    }
+  });
+});
+
+/* ---------------------------
+   Inputs: floating labels
+----------------------------*/
+document.querySelectorAll('.input').forEach(input=>{
+  input.addEventListener('focus',()=>input.parentNode.classList.add('focus'));
+  input.addEventListener('blur',()=>{ if(!input.value) input.parentNode.classList.remove('focus'); });
+});
+
+/* ---------------------------
+   Services: Modals
+----------------------------*/
+const modalViews = document.querySelectorAll('.services-modal');
+const modalBtns  = document.querySelectorAll('.services-button');
+const modalCloses= document.querySelectorAll('.services-modal-close');
+
+modalBtns.forEach((btn,i)=>btn.addEventListener('click',()=>modalViews[i].classList.add('active-modal')));
+modalCloses.forEach((c)=>c.addEventListener('click',()=>modalViews.forEach(v=>v.classList.remove('active-modal'))));
+
+/* ---------------------------
+   OUR TEAM Carousel (3D)
+----------------------------*/
+const teamMembers = [
+  { name: "Emily Kim", role: "Founder" },
+  { name: "Michael Steward", role: "Creative Director" },
+  { name: "Emma Rodriguez", role: "Lead Developer" },
+  { name: "Julia Gimmel", role: "UX Designer" },
+  { name: "Lisa Anderson", role: "Marketing Manager" },
+  { name: "James Wilson", role: "Product Manager" }
+];
+
+const cards = document.querySelectorAll(".card");
+const dots = document.querySelectorAll(".dot");
+const memberName = document.querySelector(".member-name");
+const memberRole = document.querySelector(".member-role");
+const leftArrow = document.querySelector(".nav-arrow.left");
+const rightArrow = document.querySelector(".nav-arrow.right");
+let currentIndex = 0;
+let isAnimating = false;
+
+function updateCarousel(newIndex){
+  if(isAnimating) return;
+  isAnimating = true;
+  currentIndex = (newIndex + cards.length) % cards.length;
+
+  cards.forEach((card,i)=>{
+    const offset = (i - currentIndex + cards.length) % cards.length;
+    card.classList.remove("center","left-1","left-2","right-1","right-2","hidden");
+    if (offset === 0) card.classList.add("center");
+    else if (offset === 1) card.classList.add("right-1");
+    else if (offset === 2) card.classList.add("right-2");
+    else if (offset === cards.length - 1) card.classList.add("left-1");
+    else if (offset === cards.length - 2) card.classList.add("left-2");
+    else card.classList.add("hidden");
+  });
+
+  dots.forEach((dot,i)=>dot.classList.toggle("active", i === currentIndex));
+
+  memberName.style.opacity="0"; memberRole.style.opacity="0";
+  setTimeout(()=>{
+    memberName.textContent = teamMembers[currentIndex].name;
+    memberRole.textContent = teamMembers[currentIndex].role;
+    memberName.style.opacity="1"; memberRole.style.opacity="1";
+  },300);
+
+  setTimeout(()=>{ isAnimating = false; },800);
+}
+
+leftArrow.addEventListener("click",()=>updateCarousel(currentIndex-1));
+rightArrow.addEventListener("click",()=>updateCarousel(currentIndex+1));
+dots.forEach((dot,i)=>dot.addEventListener("click",()=>updateCarousel(i)));
+cards.forEach((card,i)=>card.addEventListener("click",()=>updateCarousel(i)));
+document.addEventListener("keydown",(e)=>{
+  if(e.key==="ArrowLeft") updateCarousel(currentIndex-1);
+  else if(e.key==="ArrowRight") updateCarousel(currentIndex+1);
+});
+let touchStartX=0, touchEndX=0;
+document.addEventListener("touchstart",(e)=>{touchStartX=e.changedTouches[0].screenX;});
+document.addEventListener("touchend",(e)=>{touchEndX=e.changedTouches[0].screenX; handleSwipe();});
+function handleSwipe(){
+  const swipeThreshold=50, diff=touchStartX-touchEndX;
+  if(Math.abs(diff)>swipeThreshold){ diff>0? updateCarousel(currentIndex+1):updateCarousel(currentIndex-1); }
+}
+updateCarousel(0);
+</script>
+</body>
+</html>
