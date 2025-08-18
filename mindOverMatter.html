@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mind Over Matter</title>
+    <title>Excel Warrior: Formula Fighter</title>
     <style>
         body {
             margin: 0;
             padding: 0;
-            background: #000;
+            background: #1e3a1e;
             display: flex;
             justify-content: center;
             align-items: top;
@@ -21,20 +21,19 @@
             position: relative;
             width: 800px;
             height: 900px;
-            border: 3px solid #4ade80;
+            border: 3px solid #217346;
             box-shadow: 
-                0 0 30px rgba(74, 222, 128, 0.6),
-                inset 0 0 20px rgba(74, 222, 128, 0.1);
-            background: linear-gradient(180deg, #0a0a0a 0%, #1a0033 70%, #000022 100%);
+                0 0 30px rgba(33, 115, 70, 0.6),
+                inset 0 0 20px rgba(33, 115, 70, 0.1);
+            background: linear-gradient(180deg, #0e2818 0%, #0a1a0e 70%, #071009 100%);
             overflow: hidden;
-align: top
         }
 
         #gameCanvas {
             display: block;
             background: transparent;
             border: none;
-height: 900px;
+            height: 900px;
         }
 
         #ui {
@@ -42,13 +41,13 @@ height: 900px;
             top: 10px;
             left: 10px;
             right: 10px;
-            color: #4ade80;
+            color: #217346;
             font-size: 18px;
             font-weight: bold;
             z-index: 10;
             display: flex;
             justify-content: space-between;
-            text-shadow: 0 0 5px rgba(74, 222, 128, 0.8);
+            text-shadow: 0 0 5px rgba(33, 115, 70, 0.8);
         }
 
         #startScreen, #gameOverScreen {
@@ -62,7 +61,7 @@ height: 900px;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            color: #4ade80;
+            color: #217346;
             z-index: 20;
         }
 
@@ -70,8 +69,12 @@ height: 900px;
             font-size: 48px;
             font-weight: bold;
             margin-bottom: 20px;
-            text-shadow: 0 0 10px rgba(74, 222, 128, 0.8);
+            text-shadow: 0 0 10px rgba(33, 115, 70, 0.8);
             animation: pulse 2s infinite;
+            background: linear-gradient(45deg, #217346, #70ad47, #a9d18e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .subtitle {
@@ -89,14 +92,15 @@ height: 900px;
             opacity: 0.7;
         }
 
-        .supportMessage {
-            position: absolute;
-            color: rgba(74, 222, 128, 0.7);
-            font-size: 14px;
-            font-weight: normal;
-            pointer-events: none;
-            animation: fadeInOut 4s ease-in-out;
-            text-shadow: 0 0 3px rgba(74, 222, 128, 0.5);
+        .excel-logo {
+            font-size: 64px;
+            margin-bottom: 20px;
+            animation: logoSpin 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes logoSpin {
+            0% { transform: rotate(-5deg) scale(1); }
+            100% { transform: rotate(5deg) scale(1.1); }
         }
 
         @keyframes pulse {
@@ -126,9 +130,9 @@ height: 900px;
         }
 
         #victoryScreen {
-            background: linear-gradient(45deg, rgba(0, 0, 0, 0.85), rgba(26, 0, 51, 0.8));
+            background: linear-gradient(45deg, rgba(0, 0, 0, 0.85), rgba(14, 40, 24, 0.8));
             backdrop-filter: blur(8px);
-            color: #4ade80;
+            color: #217346;
             z-index: 30;
         }
 
@@ -136,11 +140,11 @@ height: 900px;
             font-size: 52px;
             font-weight: bold;
             margin-bottom: 25px;
-            background: linear-gradient(45deg, #4ade80, #22c55e, #86efac);
+            background: linear-gradient(45deg, #217346, #70ad47, #a9d18e);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: 0 0 20px rgba(74, 222, 128, 0.5);
+            text-shadow: 0 0 20px rgba(33, 115, 70, 0.5);
             animation: victoryPulse 3s infinite;
         }
 
@@ -149,39 +153,57 @@ height: 900px;
             50% { transform: scale(1.08); filter: brightness(1.2); }
         }
 
-        .powerup {
+        .excel-tip {
             position: absolute;
-            color: rgba(34, 197, 94, 0.9);
+            color: rgba(112, 173, 71, 0.9);
             font-size: 14px;
             font-weight: bold;
             pointer-events: none;
-            text-shadow: 0 0 8px rgba(34, 197, 94, 0.8);
-            animation: powerupPulse 2s ease-in-out infinite;
+            text-shadow: 0 0 8px rgba(112, 173, 71, 0.8);
+            animation: tipPulse 2s ease-in-out infinite;
         }
 
-        @keyframes powerupPulse {
+        @keyframes tipPulse {
             0%, 100% { transform: scale(1); opacity: 0.9; }
             50% { transform: scale(1.1); opacity: 1; }
         }
 
         .timer-option {
             padding: 10px 20px;
-            border: 2px solid #00ffff;
-            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid #217346;
+            background: rgba(33, 115, 70, 0.1);
             cursor: pointer;
             transition: all 0.3s;
             font-weight: bold;
+            color: #217346;
         }
 
         .timer-option.selected {
-            background: rgba(0, 255, 255, 0.3);
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            background: rgba(33, 115, 70, 0.3);
+            box-shadow: 0 0 15px rgba(33, 115, 70, 0.5);
             transform: scale(1.1);
         }
 
         .timer-option:hover {
-            background: rgba(0, 255, 255, 0.2);
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+            background: rgba(33, 115, 70, 0.2);
+            box-shadow: 0 0 10px rgba(33, 115, 70, 0.3);
+        }
+
+        .boss-warning {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 32px;
+            color: #ff0000;
+            text-shadow: 0 0 20px #ff0000;
+            z-index: 50;
+            animation: warningFlash 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes warningFlash {
+            0% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
         }
     </style>
 </head>
@@ -191,56 +213,60 @@ height: 900px;
         
         <div id="ui">
             <div>
-                <span>Hope: <span id="score">0</span></span>
-                <span style="margin-left: 20px;">Strength: <span id="lives">3</span></span>
+                <span>📊 Points: <span id="score">0</span></span>
+                <span style="margin-left: 20px;">📈 Lives: <span id="lives">3</span></span>
             </div>
             <div>
-                <span>Time: <span id="timer">5:00</span></span>
-                <span style="margin-left: 20px;">Thoughts: <span id="enemies">0</span></span>
+                <span>⏰ Time: <span id="timer">5:00</span></span>
+                <span style="margin-left: 20px;">📋 Errors: <span id="enemies">0</span></span>
             </div>
         </div>
 
         <div id="startScreen">
-            <div class="title">MIND OVER MATTER</div>
+            <div class="excel-logo">📊</div>
+            <div class="title">EXCEL WARRIOR</div>
             <div class="subtitle">
-                Navigate through the storm in your mind<br>
-                Find strength in the support of others
+                🏹 Formula Fighter Edition 🏹<br>
+                Defend the spreadsheet from data corruption!<br>
+                Face the ultimate boss: "Missing Closing Parenthesis"
             </div>
             
-            <div style="margin: 30px 0; color: #88ffff; font-size: 18px;">
-                <div style="margin-bottom: 15px;">Choose Your Journey Length:</div>
+            <div style="margin: 30px 0; color: #70ad47; font-size: 18px;">
+                <div style="margin-bottom: 15px;">Choose Your Spreadsheet Complexity:</div>
                 <div id="timerOptions" style="display: flex; justify-content: center; gap: 40px;">
-                    <div id="timer1" class="timer-option selected">1 MIN</div>
-                    <div id="timer3" class="timer-option">3 MIN</div>
-                    <div id="timer5" class="timer-option">5 MIN</div>
+                    <div id="timer1" class="timer-option selected">BASIC (1 MIN)</div>
+                    <div id="timer3" class="timer-option">ADVANCED (3 MIN)</div>
+                    <div id="timer5" class="timer-option">EXPERT (5 MIN)</div>
                 </div>
                 <div style="margin-top: 10px; font-size: 14px; opacity: 0.7;">Use ← → to select, SPACEBAR to confirm</div>
             </div>
             
             <div class="controls">
-                ARROW KEYS - Navigate Your Path<br>
-                SPACEBAR - Focus & Clear Negative Thoughts<br>
-                ARROW + SPACEBAR - Angled Focus Beams<br>
+                ARROW KEYS - Navigate Your Cell 🧭<br>
+                SPACEBAR - Fire Formula Corrections 🎯<br>
+                ARROW + SPACEBAR - Diagonal Formula Shots 📐<br>
                 <br>
-                <span style="color: #00ffff;">Press SPACEBAR to Begin Your Journey</span>
+                💡 <span style="color: #70ad47;">Collect Excel Functions for Power-ups!</span> 💡<br>
+                <br>
+                <span style="color: #217346;">Press SPACEBAR to Enter the Spreadsheet</span>
             </div>
         </div>
 
         <div id="gameOverScreen">
-            <div class="title">JOURNEY COMPLETE</div>
-            <div class="subtitle">Hope Generated: <span id="finalScore">0</span><br>Remember: You are stronger than you think</div>
-            <div class="controls">Press SPACEBAR to Start a New Journey</div>
+            <div class="title">SPREADSHEET CORRUPTED</div>
+            <div class="subtitle">Final Score: <span id="finalScore">0</span><br>💾 Don't forget to save your work next time! 💾</div>
+            <div class="controls">Press SPACEBAR to Restart Excel</div>
         </div>
 
         <div id="victoryScreen">
-            <div class="victory-title">🧘 PEACE OF MIND 🧘</div>
-            <div class="subtitle">You have found inner peace and balance<br>Hope Generated: <span id="victoryScore">0</span><br><br>You've learned that with focus, support, and positive habits,<br>you can overcome any mental challenge.</div>
+            <div class="victory-title">🏆 EXCEL MASTER 🏆</div>
+            <div class="subtitle">You have mastered the spreadsheet!<br>Final Score: <span id="victoryScore">0</span><br><br>🎉 All formulas debugged and parentheses balanced! 🎉<br>You are now a certified Excel Warrior!</div>
             <div class="controls">Press SPACEBAR to Return to Main Menu</div>
         </div>
     </div>
 
     <script>
-        // Mind Over Matter Game - Function-based implementation for better compatibility
+        // Excel Warrior Game - Enhanced for Excel theme
         let game = {
             // Canvas and context
             canvas: null,
@@ -253,109 +279,82 @@ height: 900px;
             score: 0,
             lives: 3,
             gameTime: 0,
-            maxGameTime: 60, // Default 1 minute
-            selectedTime: 1, // Selected timer option (1, 3, or 5 minutes)
-            backgroundTransition: 0, // 0 = neural network, 1 = zen clouds
+            maxGameTime: 60,
+            selectedTime: 1,
+            backgroundTransition: 0,
             bossSpawned: false,
             boss: null,
             lightningFlashes: [],
             timerStopped: false,
+            bossWarning: false,
             
             // Game objects
             player: null,
-            focusBeams: [],
-            negativeThoughts: [],
+            formulaShots: [],
+            excelErrors: [],
             particles: [],
             powerups: [],
-            neurons: [],
-            connections: [],
-            clouds: [],
+            spreadsheetCells: [],
+            gridLines: [],
             
             // Input and timing
             keys: {},
-            lastFocus: 0,
+            lastShot: 0,
             messageTimer: 0,
-            thoughtSpawnTimer: 0,
+            errorSpawnTimer: 0,
             powerupSpawnTimer: 0,
             lastTime: 0,
             
-            // Game data
-            negativeWords: [
-                'worthless', 'failure', 'hopeless', 'anxious', 'overwhelmed',
-                'isolated', 'defeated', 'exhausted', 'lost', 'broken',
-                'inadequate', 'scared', 'lonely', 'stuck', 'numb'
+            // Excel-themed data
+            excelErrors_list: [
+                '#VALUE!', '#REF!', '#DIV/0!', '#NAME?', '#N/A', '#NULL!',
+                'Circular Ref', 'Parse Error', 'Type Mismatch', 'Invalid Cell',
+                'Formula Error', 'Syntax Error', 'Range Error', 'Data Error',
+                'Missing Data', 'Wrong Format', 'Bad Reference', 'Overflow'
             ],
             
-            powerupWords: [
-                'meditation', 'exercise', 'friends', 'hiking', 'journaling',
-                'therapy', 'music', 'reading', 'nature', 'sleep',
-                'mindfulness', 'gratitude', 'breathing', 'yoga'
+            excelFunctions: [
+                'SUM', 'VLOOKUP', 'IF', 'COUNT', 'AVERAGE', 'MAX',
+                'MIN', 'CONCATENATE', 'INDEX', 'MATCH', 'PIVOT',
+                'FILTER', 'SORT', 'UNIQUE', 'XLOOKUP', 'SUMIF'
             ],
             
-            supportiveMessages: [
-                "You are enough, just as you are",
-                "This feeling is temporary", 
-                "You've overcome challenges before",
-                "Take it one breath at a time",
-                "You are not alone in this",
-                "Progress, not perfection",
-                "You have the strength within you",
-                "You deserve peace and happiness"
+            excelTips: [
+                "💡 Ctrl+Z is your best friend",
+                "📊 Always validate your data sources",
+                "🔍 Use F2 to edit formulas in-cell",
+                "💾 Save early, save often",
+                "📋 Name your ranges for clarity",
+                "🎯 Use absolute references ($A$1)",
+                "📈 Conditional formatting saves time",
+                "⌨️ Learn keyboard shortcuts"
             ],
 
             init: function() {
                 this.canvas = document.getElementById('gameCanvas');
                 this.ctx = this.canvas.getContext('2d');
-                this.initializeNeuralNetwork();
-                this.initializeClouds();
+                this.initializeSpreadsheet();
                 this.setupEventListeners();
                 this.createPlayer();
-                this.updateTimerDisplay(); // Set initial timer selection
+                this.updateTimerDisplay();
                 this.gameLoop();
             },
 
-            initializeNeuralNetwork: function() {
-                for (let i = 0; i < 100; i++) {
-                    this.neurons.push({
-                        x: Math.random() * this.width,
-                        y: Math.random() * this.height,
-                        size: Math.random() * 3 + 1,
-                        pulse: Math.random() * Math.PI * 2,
-                        pulseSpeed: Math.random() * 0.02 + 0.01,
-                        brightness: Math.random() * 0.5 + 0.3
-                    });
-                }
-
-                for (let i = 0; i < this.neurons.length; i++) {
-                    const neuron1 = this.neurons[i];
-                    for (let j = i + 1; j < this.neurons.length; j++) {
-                        const neuron2 = this.neurons[j];
-                        const distance = Math.sqrt(
-                            Math.pow(neuron1.x - neuron2.x, 2) + 
-                            Math.pow(neuron1.y - neuron2.y, 2)
-                        );
-                        
-                        if (distance < 100 && Math.random() < 0.3) {
-                            this.connections.push({
-                                from: neuron1,
-                                to: neuron2,
-                                strength: Math.random() * 0.5 + 0.2
-                            });
-                        }
+            initializeSpreadsheet: function() {
+                // Create spreadsheet grid background
+                for (let i = 0; i < 20; i++) {
+                    for (let j = 0; j < 15; j++) {
+                        this.spreadsheetCells.push({
+                            x: i * 40,
+                            y: j * 40,
+                            width: 40,
+                            height: 40,
+                            hasData: Math.random() < 0.3,
+                            value: Math.random() < 0.5 ? Math.floor(Math.random() * 100) : 'A' + Math.floor(Math.random() * 26),
+                            pulse: Math.random() * Math.PI * 2,
+                            pulseSpeed: Math.random() * 0.02 + 0.01
+                        });
                     }
-                }
-            },
-
-            initializeClouds: function() {
-                for (let i = 0; i < 15; i++) {
-                    this.clouds.push({
-                        x: Math.random() * this.width * 1.5,
-                        y: Math.random() * this.height,
-                        size: Math.random() * 80 + 40,
-                        speed: Math.random() * 20 + 10,
-                        opacity: Math.random() * 0.3 + 0.1,
-                        layer: Math.random() * 3
-                    });
                 }
             },
 
@@ -370,13 +369,12 @@ height: 900px;
                         } else if (this.gameState === 'gameOver') {
                             this.restartGame();
                         } else if (this.gameState === 'victory') {
-                            this.restartGame(); // Return to main menu after victory
+                            this.restartGame();
                         } else if (this.gameState === 'playing') {
-                            this.createFocusBeam(); // Changed from slashAttack to createFocusBeam
+                            this.createFormulaShot();
                         }
                     }
                     
-                    // Timer selection in start screen
                     if (this.gameState === 'start') {
                         if (e.code === 'ArrowLeft') {
                             e.preventDefault();
@@ -391,35 +389,6 @@ height: 900px;
                 document.addEventListener('keyup', (e) => {
                     this.keys[e.code] = false;
                 });
-            },
-
-            selectPreviousTimer: function() {
-                const options = [1, 3, 5];
-                const currentIndex = options.indexOf(this.selectedTime);
-                const newIndex = (currentIndex - 1 + options.length) % options.length;
-                this.selectedTime = options[newIndex];
-                this.updateTimerDisplay();
-            },
-
-            selectNextTimer: function() {
-                const options = [1, 3, 5];
-                const currentIndex = options.indexOf(this.selectedTime);
-                const newIndex = (currentIndex + 1) % options.length;
-                this.selectedTime = options[newIndex];
-                this.updateTimerDisplay();
-            },
-
-            updateTimerDisplay: function() {
-                // Remove selected class from all options
-                document.querySelectorAll('.timer-option').forEach(option => {
-                    option.classList.remove('selected');
-                });
-                
-                // Add selected class to current option
-                const selectedElement = document.getElementById('timer' + this.selectedTime);
-                if (selectedElement) {
-                    selectedElement.classList.add('selected');
-                }
             },
 
             selectPreviousTimer: function() {
@@ -441,31 +410,28 @@ height: 900px;
             },
 
             updateTimerDisplay: function() {
-                // Remove selected class from all options
                 document.getElementById('timer1').classList.remove('selected');
                 document.getElementById('timer3').classList.remove('selected');
                 document.getElementById('timer5').classList.remove('selected');
-                
-                // Add selected class to current option
                 document.getElementById('timer' + this.selectedTime).classList.add('selected');
             },
 
             createPlayer: function() {
                 this.player = {
                     x: this.width / 2,
-                    y: this.height / 2,
-                    width: 20,
-                    height: 20,
+                    y: this.height - 60,
+                    width: 24,
+                    height: 24,
                     speed: 250,
                     baseSpeed: 250,
-                    beamSize: 4,
-                    baseBeamSize: 4,
+                    shotSize: 4,
+                    baseShotSize: 4,
                     speedBoostTime: 0,
-                    beamBoostTime: 0,
-                    facing: 'right', // 'up', 'down', 'left', 'right'
+                    shotBoostTime: 0,
+                    facing: 'up',
                     powerupMessage: '',
                     powerupMessageTime: 0,
-                    invulnerable: 0 // invulnerability timer
+                    invulnerable: 0
                 };
             },
 
@@ -474,16 +440,17 @@ height: 900px;
                 this.score = 0;
                 this.lives = 3;
                 this.gameTime = 0;
-                this.maxGameTime = this.selectedTime * 60; // Set game time based on selection
+                this.maxGameTime = this.selectedTime * 60;
                 this.backgroundTransition = 0;
-                this.bossSpawned = false; // Reset boss spawn flag
-                this.boss = null; // Clear any existing boss
-                this.timerStopped = false; // Reset timer
-                this.focusBeams = [];
-                this.negativeThoughts = [];
+                this.bossSpawned = false;
+                this.boss = null;
+                this.timerStopped = false;
+                this.bossWarning = false;
+                this.formulaShots = [];
+                this.excelErrors = [];
                 this.particles = [];
                 this.powerups = [];
-                this.thoughtSpawnTimer = 0;
+                this.errorSpawnTimer = 0;
                 this.powerupSpawnTimer = 0;
                 this.createPlayer();
                 
@@ -504,9 +471,8 @@ height: 900px;
                 document.getElementById('victoryScore').textContent = this.score;
                 document.getElementById('victoryScreen').style.display = 'flex';
                 
-                // Clear all game objects for a clean background
-                this.negativeThoughts = [];
-                this.focusBeams = [];
+                this.excelErrors = [];
+                this.formulaShots = [];
                 this.lightningFlashes = [];
                 if (this.boss) this.boss.health = 0;
             },
@@ -520,70 +486,82 @@ height: 900px;
             update: function(deltaTime) {
                 if (this.gameState !== 'playing') return;
 
-                // Update game time and background transition (stop timer when boss appears)
                 if (!this.timerStopped) {
                     this.gameTime += deltaTime;
                     this.backgroundTransition = Math.min(this.gameTime / this.maxGameTime, 1);
                 }
                 
-                // Spawn boss at 75% of game time (25% before victory)
+                // Boss warning at 70% and spawn at 75%
+                const bossWarningTime = this.maxGameTime * 0.7;
                 const bossSpawnTime = this.maxGameTime * 0.75;
+                
+                if (this.gameTime >= bossWarningTime && !this.bossWarning && !this.bossSpawned) {
+                    this.showBossWarning();
+                }
+                
                 if (this.gameTime >= bossSpawnTime && !this.bossSpawned) {
                     this.spawnBoss();
                     this.bossSpawned = true;
-                    this.timerStopped = true; // Stop timer when boss appears
+                    this.timerStopped = true;
                 }
                 
-                // Check for victory condition (boss defeated)
                 if (this.bossSpawned && this.boss && this.boss.health <= 0) {
                     this.victory();
                     return;
                 }
 
                 this.updatePlayer(deltaTime);
-                this.updateFocusBeams(deltaTime);
-                this.updateNegativeThoughts(deltaTime);
+                this.updateFormulaShots(deltaTime);
+                this.updateExcelErrors(deltaTime);
                 this.updatePowerups(deltaTime);
                 this.updateParticles(deltaTime);
-                this.updateNeuralNetwork(deltaTime);
-                this.updateClouds(deltaTime);
+                this.updateSpreadsheet(deltaTime);
                 this.updateBoss(deltaTime);
                 this.updateLightning(deltaTime);
                 this.checkCollisions();
                 this.updateUI();
                 
-                // Spawn negative thoughts gradually (but not during boss fight)
                 if (!this.boss || this.boss.health <= 0) {
-                    this.thoughtSpawnTimer += deltaTime;
-                    const spawnRate = Math.max(3.0 - (this.gameTime / 60), 1.5);
-                    if (this.thoughtSpawnTimer > spawnRate) {
-                        this.spawnNegativeThought();
-                        this.thoughtSpawnTimer = 0;
+                    this.errorSpawnTimer += deltaTime;
+                    const spawnRate = Math.max(2.5 - (this.gameTime / 60), 1.0);
+                    if (this.errorSpawnTimer > spawnRate) {
+                        this.spawnExcelError();
+                        this.errorSpawnTimer = 0;
                     }
                 }
                 
-                // Spawn powerups occasionally
                 this.powerupSpawnTimer += deltaTime;
-                if (this.powerupSpawnTimer > 15 + Math.random() * 10) {
+                if (this.powerupSpawnTimer > 12 + Math.random() * 8) {
                     this.spawnPowerup();
                     this.powerupSpawnTimer = 0;
                 }
                 
-                // Show supportive messages
                 this.messageTimer += deltaTime;
-                if (this.messageTimer > 5 + Math.random() * 5) {
-                    this.showSupportMessage();
+                if (this.messageTimer > 8 + Math.random() * 4) {
+                    this.showExcelTip();
                     this.messageTimer = 0;
                 }
             },
 
+            showBossWarning: function() {
+                this.bossWarning = true;
+                const warningDiv = document.createElement('div');
+                warningDiv.className = 'boss-warning';
+                warningDiv.innerHTML = '⚠️ CRITICAL ERROR DETECTED ⚠️<br>Missing Closing Parenthesis Approaching!';
+                document.getElementById('gameContainer').appendChild(warningDiv);
+                
+                setTimeout(() => {
+                    if (warningDiv.parentNode) {
+                        warningDiv.parentNode.removeChild(warningDiv);
+                    }
+                }, 3000);
+            },
+
             updatePlayer: function(deltaTime) {
-                // Update invulnerability timer
                 if (this.player.invulnerable > 0) {
                     this.player.invulnerable -= deltaTime;
                 }
                 
-                // Update powerup timers
                 if (this.player.speedBoostTime > 0) {
                     this.player.speedBoostTime -= deltaTime;
                     if (this.player.speedBoostTime <= 0) {
@@ -591,14 +569,13 @@ height: 900px;
                     }
                 }
                 
-                if (this.player.beamBoostTime > 0) {
-                    this.player.beamBoostTime -= deltaTime;
-                    if (this.player.beamBoostTime <= 0) {
-                        this.player.beamSize = this.player.baseBeamSize;
+                if (this.player.shotBoostTime > 0) {
+                    this.player.shotBoostTime -= deltaTime;
+                    if (this.player.shotBoostTime <= 0) {
+                        this.player.shotSize = this.player.baseShotSize;
                     }
                 }
                 
-                // Update powerup message timer
                 if (this.player.powerupMessageTime > 0) {
                     this.player.powerupMessageTime -= deltaTime;
                     if (this.player.powerupMessageTime <= 0) {
@@ -606,7 +583,7 @@ height: 900px;
                     }
                 }
                 
-                // Movement with dynamic facing
+                // Movement
                 if (this.keys['ArrowLeft'] && this.player.x > 10) {
                     this.player.x -= this.player.speed * deltaTime;
                     this.player.facing = 'left';
@@ -624,36 +601,32 @@ height: 900px;
                     this.player.facing = 'down';
                 }
 
-                // Focus beam shooting
-                if (this.keys['Space'] && Date.now() - this.lastFocus > 200) {
-                    this.createFocusBeam();
-                    this.lastFocus = Date.now();
+                if (this.keys['Space'] && Date.now() - this.lastShot > 150) {
+                    this.createFormulaShot();
+                    this.lastShot = Date.now();
                 }
             },
 
-            createFocusBeam: function() {
-                // Calculate shooting angle based on pressed keys or facing direction
+            createFormulaShot: function() {
                 let angle = 0;
                 
-                // Check for diagonal shooting with arrow keys (priority)
                 if (this.keys['ArrowUp'] && this.keys['ArrowRight']) {
-                    angle = -Math.PI / 4; // Up-right
+                    angle = -Math.PI / 4;
                 } else if (this.keys['ArrowUp'] && this.keys['ArrowLeft']) {
-                    angle = -3 * Math.PI / 4; // Up-left
+                    angle = -3 * Math.PI / 4;
                 } else if (this.keys['ArrowDown'] && this.keys['ArrowRight']) {
-                    angle = Math.PI / 4; // Down-right
+                    angle = Math.PI / 4;
                 } else if (this.keys['ArrowDown'] && this.keys['ArrowLeft']) {
-                    angle = 3 * Math.PI / 4; // Down-left
+                    angle = 3 * Math.PI / 4;
                 } else if (this.keys['ArrowUp']) {
-                    angle = -Math.PI / 2; // Straight up
+                    angle = -Math.PI / 2;
                 } else if (this.keys['ArrowDown']) {
-                    angle = Math.PI / 2; // Straight down
+                    angle = Math.PI / 2;
                 } else if (this.keys['ArrowLeft']) {
-                    angle = Math.PI; // Left
+                    angle = Math.PI;
                 } else if (this.keys['ArrowRight']) {
-                    angle = 0; // Right
+                    angle = 0;
                 } else {
-                    // If no keys pressed, shoot in facing direction
                     switch(this.player.facing) {
                         case 'up': angle = -Math.PI / 2; break;
                         case 'down': angle = Math.PI / 2; break;
@@ -662,34 +635,35 @@ height: 900px;
                     }
                 }
                 
-                this.focusBeams.push({
+                this.formulaShots.push({
                     x: this.player.x + this.player.width / 2,
                     y: this.player.y + this.player.height / 2,
-                    vx: Math.cos(angle) * 400,
-                    vy: Math.sin(angle) * 400,
-                    width: this.player.beamSize,
-                    height: this.player.beamSize,
+                    vx: Math.cos(angle) * 450,
+                    vy: Math.sin(angle) * 450,
+                    width: this.player.shotSize,
+                    height: this.player.shotSize,
                     life: 3,
-                    maxLife: 3
+                    maxLife: 3,
+                    formula: '=' // Excel formula symbol
                 });
 
-                // Add focus particles
-                for (let i = 0; i < 5; i++) {
+                // Add shot particles
+                for (let i = 0; i < 3; i++) {
                     this.particles.push({
                         x: this.player.x + this.player.width / 2,
                         y: this.player.y + this.player.height / 2,
-                        vx: Math.cos(angle) * 100 + (Math.random() - 0.5) * 50,
-                        vy: Math.sin(angle) * 100 + (Math.random() - 0.5) * 50,
-                        life: 0.4,
-                        maxLife: 0.4,
+                        vx: Math.cos(angle) * 80 + (Math.random() - 0.5) * 30,
+                        vy: Math.sin(angle) * 80 + (Math.random() - 0.5) * 30,
+                        life: 0.3,
+                        maxLife: 0.3,
                         size: Math.random() * 2 + 1,
-                        color: [74, 222, 128]
+                        color: [33, 115, 70]
                     });
                 }
             },
 
-            spawnNegativeThought: function() {
-                const word = this.negativeWords[Math.floor(Math.random() * this.negativeWords.length)];
+            spawnExcelError: function() {
+                const error = this.excelErrors_list[Math.floor(Math.random() * this.excelErrors_list.length)];
                 const edge = Math.floor(Math.random() * 4);
                 let x, y, vx, vy;
                 
@@ -697,121 +671,247 @@ height: 900px;
                     case 0: // Top
                         x = Math.random() * this.width;
                         y = -30;
-                        vx = (Math.random() - 0.5) * 30;
-                        vy = Math.random() * 20 + 10;
+                        vx = (Math.random() - 0.5) * 40;
+                        vy = Math.random() * 25 + 15;
                         break;
                     case 1: // Right
                         x = this.width + 30;
                         y = Math.random() * this.height;
-                        vx = -(Math.random() * 20 + 10);
-                        vy = (Math.random() - 0.5) * 30;
+                        vx = -(Math.random() * 25 + 15);
+                        vy = (Math.random() - 0.5) * 40;
                         break;
                     case 2: // Bottom
                         x = Math.random() * this.width;
                         y = this.height + 30;
-                        vx = (Math.random() - 0.5) * 30;
-                        vy = -(Math.random() * 20 + 10);
+                        vx = (Math.random() - 0.5) * 40;
+                        vy = -(Math.random() * 25 + 15);
                         break;
                     case 3: // Left
                         x = -30;
                         y = Math.random() * this.height;
-                        vx = Math.random() * 20 + 10;
-                        vy = (Math.random() - 0.5) * 30;
+                        vx = Math.random() * 25 + 15;
+                        vy = (Math.random() - 0.5) * 40;
                         break;
                 }
                 
-                // Sometimes spawn stronger enemies that require multiple hits
-                const isStrong = Math.random() < 0.3; // 30% chance
-                const health = isStrong ? 3 : 1;
+                const isCritical = Math.random() < 0.25; // 25% chance for critical errors
+                const health = isCritical ? 3 : 1;
                 
-                this.negativeThoughts.push({
+                this.excelErrors.push({
                     x: x, y: y, vx: vx, vy: vy,
-                    word: word,
-                    width: word.length * 12,
+                    error: error,
+                    width: error.length * 10,
                     height: 20,
                     health: health,
                     maxHealth: health,
                     intensity: Math.random() * 0.5 + 0.5,
                     wobble: Math.random() * Math.PI * 2,
-                    isStrong: isStrong
+                    isCritical: isCritical
                 });
             },
 
             spawnPowerup: function() {
-                const word = this.powerupWords[Math.floor(Math.random() * this.powerupWords.length)];
+                const func = this.excelFunctions[Math.floor(Math.random() * this.excelFunctions.length)];
                 const edge = Math.floor(Math.random() * 4);
                 let x, y, vx, vy;
                 
                 switch (edge) {
-                    case 0: x = Math.random() * this.width; y = -30; vx = (Math.random() - 0.5) * 20; vy = Math.random() * 15 + 10; break;
-                    case 1: x = this.width + 30; y = Math.random() * this.height; vx = -(Math.random() * 15 + 10); vy = (Math.random() - 0.5) * 20; break;
-                    case 2: x = Math.random() * this.width; y = this.height + 30; vx = (Math.random() - 0.5) * 20; vy = -(Math.random() * 15 + 10); break;
-                    case 3: x = -30; y = Math.random() * this.height; vx = Math.random() * 15 + 10; vy = (Math.random() - 0.5) * 20; break;
+                    case 0: x = Math.random() * this.width; y = -30; vx = (Math.random() - 0.5) * 20; vy = Math.random() * 20 + 10; break;
+                    case 1: x = this.width + 30; y = Math.random() * this.height; vx = -(Math.random() * 20 + 10); vy = (Math.random() - 0.5) * 20; break;
+                    case 2: x = Math.random() * this.width; y = this.height + 30; vx = (Math.random() - 0.5) * 20; vy = -(Math.random() * 20 + 10); break;
+                    case 3: x = -30; y = Math.random() * this.height; vx = Math.random() * 20 + 10; vy = (Math.random() - 0.5) * 20; break;
                 }
                 
-                const powerupType = Math.random() < 0.5 ? 'speed' : 'beam';
+                const powerupType = Math.random() < 0.5 ? 'speed' : 'shot';
                 
                 this.powerups.push({
                     x: x, y: y, vx: vx, vy: vy,
-                    word: word, type: powerupType,
-                    width: word.length * 12, height: 20,
+                    func: func, type: powerupType,
+                    width: func.length * 12, height: 20,
                     pulse: Math.random() * Math.PI * 2
                 });
             },
 
-            showSupportMessage: function() {
-                const message = this.supportiveMessages[Math.floor(Math.random() * this.supportiveMessages.length)];
-                const messageDiv = document.createElement('div');
-                messageDiv.className = 'supportMessage';
-                messageDiv.textContent = message;
-                messageDiv.style.left = Math.random() * 600 + 100 + 'px';
-                messageDiv.style.top = Math.random() * 400 + 100 + 'px';
+            showExcelTip: function() {
+                const tip = this.excelTips[Math.floor(Math.random() * this.excelTips.length)];
+                const tipDiv = document.createElement('div');
+                tipDiv.className = 'excel-tip';
+                tipDiv.textContent = tip;
+                tipDiv.style.left = Math.random() * 600 + 100 + 'px';
+                tipDiv.style.top = Math.random() * 400 + 100 + 'px';
                 
-                document.getElementById('gameContainer').appendChild(messageDiv);
+                document.getElementById('gameContainer').appendChild(tipDiv);
                 
                 setTimeout(() => {
-                    if (messageDiv.parentNode) {
-                        messageDiv.parentNode.removeChild(messageDiv);
+                    if (tipDiv.parentNode) {
+                        tipDiv.parentNode.removeChild(tipDiv);
                     }
                 }, 4000);
             },
 
-            updateFocusBeams: function(deltaTime) {
-                for (let i = this.focusBeams.length - 1; i >= 0; i--) {
-                    const beam = this.focusBeams[i];
-                    beam.x += beam.vx * deltaTime;
-                    beam.y += beam.vy * deltaTime;
-                    beam.life -= deltaTime;
+            spawnBoss: function() {
+                this.excelErrors = [];
+                
+                // Lightning effects for boss entrance
+                for (let i = 0; i < 15; i++) {
+                    this.lightningFlashes.push({
+                        x: Math.random() * this.width,
+                        y: Math.random() * this.height,
+                        width: 4 + Math.random() * 6,
+                        height: 60 + Math.random() * 120,
+                        life: 0.8 + Math.random() * 0.7,
+                        maxLife: 1.5,
+                        intensity: Math.random() * 0.9 + 0.1
+                    });
+                }
+                
+                // Create the ultimate boss: Missing Closing Parenthesis
+                this.boss = {
+                    x: this.width / 2 - 80,
+                    y: this.height / 4,
+                    width: 160,
+                    height: 100,
+                    health: 100, // More health for ultimate boss
+                    maxHealth: 100,
+                    vx: 0,
+                    vy: 0,
+                    phase: 0,
+                    attackTimer: 0,
+                    pulsePhase: 0,
+                    name: 'Missing Closing Parenthesis',
+                    attackPattern: 0
+                };
+            },
+
+            updateBoss: function(deltaTime) {
+                if (!this.boss || this.boss.health <= 0) return;
+                
+                this.boss.phase += deltaTime;
+                this.boss.pulsePhase += deltaTime * 4;
+                this.boss.attackTimer += deltaTime;
+                
+                // Complex boss movement
+                this.boss.x += Math.sin(this.boss.phase * 0.6) * 60 * deltaTime;
+                this.boss.y += Math.cos(this.boss.phase * 0.4) * 20 * deltaTime;
+                
+                // Keep boss on screen
+                this.boss.x = Math.max(30, Math.min(this.width - this.boss.width - 30, this.boss.x));
+                this.boss.y = Math.max(30, Math.min(this.height / 2, this.boss.y));
+                
+                // Boss attacks with different patterns
+                if (this.boss.attackTimer > 1.8) {
+                    this.spawnBossAttack();
+                    this.boss.attackTimer = 0;
+                    this.boss.attackPattern = (this.boss.attackPattern + 1) % 3;
+                }
+            },
+
+            spawnBossAttack: function() {
+                const attacks = ['#ERROR!', 'SYNTAX', 'MISSING )', 'PARSE FAIL', 'BAD FORMULA'];
+                
+                switch(this.boss.attackPattern) {
+                    case 0: // Spread attack
+                        for (let i = 0; i < 5; i++) {
+                            const angle = (i - 2) * 0.3;
+                            const error = attacks[Math.floor(Math.random() * attacks.length)];
+                            this.excelErrors.push({
+                                x: this.boss.x + this.boss.width / 2,
+                                y: this.boss.y + this.boss.height,
+                                vx: Math.sin(angle) * 80,
+                                vy: Math.cos(angle) * 80 + 50,
+                                error: error,
+                                width: error.length * 10,
+                                height: 20,
+                                health: 2,
+                                maxHealth: 2,
+                                intensity: 1,
+                                wobble: Math.random() * Math.PI * 2,
+                                isCritical: true
+                            });
+                        }
+                        break;
+                    case 1: // Circular attack
+                        for (let i = 0; i < 8; i++) {
+                            const angle = (i / 8) * Math.PI * 2;
+                            const error = attacks[Math.floor(Math.random() * attacks.length)];
+                            this.excelErrors.push({
+                                x: this.boss.x + this.boss.width / 2,
+                                y: this.boss.y + this.boss.height / 2,
+                                vx: Math.cos(angle) * 100,
+                                vy: Math.sin(angle) * 100,
+                                error: error,
+                                width: error.length * 10,
+                                height: 20,
+                                health: 2,
+                                maxHealth: 2,
+                                intensity: 1,
+                                wobble: Math.random() * Math.PI * 2,
+                                isCritical: true
+                            });
+                        }
+                        break;
+                    case 2: // Targeted attack
+                        const dx = this.player.x - this.boss.x;
+                        const dy = this.player.y - this.boss.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        if (distance > 0) {
+                            for (let i = 0; i < 3; i++) {
+                                const error = 'MISSING )';
+                                this.excelErrors.push({
+                                    x: this.boss.x + this.boss.width / 2,
+                                    y: this.boss.y + this.boss.height,
+                                    vx: (dx / distance) * 120 + (Math.random() - 0.5) * 40,
+                                    vy: (dy / distance) * 120 + (Math.random() - 0.5) * 40,
+                                    error: error,
+                                    width: error.length * 10,
+                                    height: 20,
+                                    health: 3,
+                                    maxHealth: 3,
+                                    intensity: 1,
+                                    wobble: Math.random() * Math.PI * 2,
+                                    isCritical: true
+                                });
+                            }
+                        }
+                        break;
+                }
+            },
+
+            updateFormulaShots: function(deltaTime) {
+                for (let i = this.formulaShots.length - 1; i >= 0; i--) {
+                    const shot = this.formulaShots[i];
+                    shot.x += shot.vx * deltaTime;
+                    shot.y += shot.vy * deltaTime;
+                    shot.life -= deltaTime;
                     
-                    if (beam.life <= 0 || beam.x < 0 || beam.x > this.width || beam.y < 0 || beam.y > this.height) {
-                        this.focusBeams.splice(i, 1);
+                    if (shot.life <= 0 || shot.x < 0 || shot.x > this.width || shot.y < 0 || shot.y > this.height) {
+                        this.formulaShots.splice(i, 1);
                     }
                 }
             },
 
-            updateNegativeThoughts: function(deltaTime) {
-                for (let i = this.negativeThoughts.length - 1; i >= 0; i--) {
-                    const thought = this.negativeThoughts[i];
+            updateExcelErrors: function(deltaTime) {
+                for (let i = this.excelErrors.length - 1; i >= 0; i--) {
+                    const error = this.excelErrors[i];
                     
-                    thought.x += thought.vx * deltaTime;
-                    thought.y += thought.vy * deltaTime;
-                    thought.wobble += deltaTime * 2;
+                    error.x += error.vx * deltaTime;
+                    error.y += error.vy * deltaTime;
+                    error.wobble += deltaTime * 3;
                     
-                    // Move towards player
-                    const dx = this.player.x - thought.x;
-                    const dy = this.player.y - thought.y;
+                    // Move towards player slightly
+                    const dx = this.player.x - error.x;
+                    const dy = this.player.y - error.y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
                     
                     if (distance > 0) {
-                        const attraction = 15 * deltaTime;
-                        thought.vx += (dx / distance) * attraction;
-                        thought.vy += (dy / distance) * attraction;
+                        const attraction = 8 * deltaTime;
+                        error.vx += (dx / distance) * attraction;
+                        error.vy += (dy / distance) * attraction;
                     }
                     
-                    // Remove off-screen thoughts
-                    if (thought.x < -200 || thought.x > this.width + 200 || 
-                        thought.y < -200 || thought.y > this.height + 200) {
-                        this.negativeThoughts.splice(i, 1);
+                    if (error.x < -200 || error.x > this.width + 200 || 
+                        error.y < -200 || error.y > this.height + 200) {
+                        this.excelErrors.splice(i, 1);
                     }
                 }
             },
@@ -821,7 +921,7 @@ height: 900px;
                     const powerup = this.powerups[i];
                     powerup.x += powerup.vx * deltaTime;
                     powerup.y += powerup.vy * deltaTime;
-                    powerup.pulse += deltaTime * 3;
+                    powerup.pulse += deltaTime * 4;
                     
                     if (powerup.x < -200 || powerup.x > this.width + 200 || 
                         powerup.y < -200 || powerup.y > this.height + 200) {
@@ -836,7 +936,7 @@ height: 900px;
                     particle.x += particle.vx * deltaTime;
                     particle.y += particle.vy * deltaTime;
                     particle.life -= deltaTime;
-                    particle.vy += 50 * deltaTime; // gravity
+                    particle.vy += 40 * deltaTime; // gravity
                     
                     if (particle.life <= 0) {
                         this.particles.splice(i, 1);
@@ -844,53 +944,66 @@ height: 900px;
                 }
             },
 
-            updateNeuralNetwork: function(deltaTime) {
-                for (let neuron of this.neurons) {
-                    neuron.pulse += neuron.pulseSpeed;
+            updateSpreadsheet: function(deltaTime) {
+                for (let cell of this.spreadsheetCells) {
+                    cell.pulse += cell.pulseSpeed;
                 }
             },
 
-            updateClouds: function(deltaTime) {
-                for (let cloud of this.clouds) {
-                    cloud.x -= cloud.speed * deltaTime;
-                    if (cloud.x < -cloud.size) {
-                        cloud.x = this.width + cloud.size;
+            updateLightning: function(deltaTime) {
+                for (let i = this.lightningFlashes.length - 1; i >= 0; i--) {
+                    const lightning = this.lightningFlashes[i];
+                    lightning.life -= deltaTime;
+                    
+                    if (lightning.life <= 0) {
+                        this.lightningFlashes.splice(i, 1);
                     }
+                }
+                
+                if (this.boss && this.boss.health > 0 && Math.random() < 0.03) {
+                    this.lightningFlashes.push({
+                        x: Math.random() * this.width,
+                        y: 0,
+                        width: 3 + Math.random() * 4,
+                        height: this.height,
+                        life: 0.15 + Math.random() * 0.25,
+                        maxLife: 0.4,
+                        intensity: 0.7 + Math.random() * 0.3
+                    });
                 }
             },
 
             checkCollisions: function() {
-                // Beams vs thoughts
-                for (let i = this.focusBeams.length - 1; i >= 0; i--) {
-                    const beam = this.focusBeams[i];
-                    for (let j = this.negativeThoughts.length - 1; j >= 0; j--) {
-                        const thought = this.negativeThoughts[j];
-                        if (this.isColliding(beam, thought)) {
-                            // Damage the thought
-                            thought.health -= 1;
-                            this.focusBeams.splice(i, 1);
+                // Formula shots vs errors
+                for (let i = this.formulaShots.length - 1; i >= 0; i--) {
+                    const shot = this.formulaShots[i];
+                    for (let j = this.excelErrors.length - 1; j >= 0; j--) {
+                        const error = this.excelErrors[j];
+                        if (this.isColliding(shot, error)) {
+                            error.health -= 1;
+                            this.formulaShots.splice(i, 1);
                             
-                            if (thought.health <= 0) {
-                                this.createTransformationEffect(thought.x + thought.width / 2, thought.y + thought.height / 2);
-                                this.negativeThoughts.splice(j, 1);
-                                this.score += thought.isStrong ? 150 : 50;
+                            if (error.health <= 0) {
+                                this.createFixEffect(error.x + error.width / 2, error.y + error.height / 2);
+                                this.excelErrors.splice(j, 1);
+                                this.score += error.isCritical ? 200 : 75;
                             } else {
-                                this.createHitEffect(thought.x + thought.width / 2, thought.y + thought.height / 2);
-                                this.score += 10;
+                                this.createHitEffect(error.x + error.width / 2, error.y + error.height / 2);
+                                this.score += 25;
                             }
                             break;
                         }
                     }
                     
-                    // Beams vs boss
-                    if (this.boss && this.boss.health > 0 && this.isColliding(beam, this.boss)) {
-                        this.boss.health -= 1;
-                        this.focusBeams.splice(i, 1);
-                        this.score += 25;
+                    // Shots vs boss
+                    if (this.boss && this.boss.health > 0 && this.isColliding(shot, this.boss)) {
+                        this.boss.health -= 2; // Boss takes less damage per shot
+                        this.formulaShots.splice(i, 1);
+                        this.score += 50;
                         
                         if (this.boss.health <= 0) {
                             this.createBossDestroyEffect();
-                            this.score += 1000;
+                            this.score += 2000;
                         } else {
                             this.createHitEffect(this.boss.x + this.boss.width / 2, this.boss.y + this.boss.height / 2);
                         }
@@ -898,14 +1011,14 @@ height: 900px;
                     }
                 }
 
-                // Player vs thoughts
-                for (let i = this.negativeThoughts.length - 1; i >= 0; i--) {
-                    const thought = this.negativeThoughts[i];
-                    if (this.player.invulnerable <= 0 && this.isColliding(this.player, thought)) {
-                        this.createOverwhelmEffect(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2);
+                // Player vs errors
+                for (let i = this.excelErrors.length - 1; i >= 0; i--) {
+                    const error = this.excelErrors[i];
+                    if (this.player.invulnerable <= 0 && this.isColliding(this.player, error)) {
+                        this.createCorruptionEffect(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2);
                         this.lives--;
-                        this.player.invulnerable = 2.0; // 2 seconds of invulnerability
-                        this.negativeThoughts.splice(i, 1);
+                        this.player.invulnerable = 2.5;
+                        this.excelErrors.splice(i, 1);
                         if (this.lives <= 0) {
                             this.gameOver();
                         }
@@ -915,9 +1028,9 @@ height: 900px;
 
                 // Player vs boss
                 if (this.boss && this.boss.health > 0 && this.player.invulnerable <= 0 && this.isColliding(this.player, this.boss)) {
-                    this.createOverwhelmEffect(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2);
-                    this.lives -= 2; // Boss does more damage
-                    this.player.invulnerable = 2.0; // 2 seconds of invulnerability
+                    this.createCorruptionEffect(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2);
+                    this.lives -= 2;
+                    this.player.invulnerable = 2.5;
                     if (this.lives <= 0) {
                         this.gameOver();
                     }
@@ -930,7 +1043,7 @@ height: 900px;
                         this.applyPowerup(powerup);
                         this.createPowerupEffect(powerup.x + powerup.width / 2, powerup.y + powerup.height / 2);
                         this.powerups.splice(i, 1);
-                        this.score += 100;
+                        this.score += 150;
                         break;
                     }
                 }
@@ -945,38 +1058,54 @@ height: 900px;
 
             applyPowerup: function(powerup) {
                 if (powerup.type === 'speed') {
-                    this.player.speed = this.player.baseSpeed * 1.6;
-                    this.player.speedBoostTime = 10;
-                    this.player.powerupMessage = '⚡ Speed Boost!';
-                    this.player.powerupMessageTime = 2.5;
-                } else if (powerup.type === 'beam') {
-                    this.player.beamSize = this.player.baseBeamSize * 2;
-                    this.player.beamBoostTime = 12;
-                    this.player.powerupMessage = '🎯 Beam Enhancement!';
-                    this.player.powerupMessageTime = 2.5;
+                    this.player.speed = this.player.baseSpeed * 1.8;
+                    this.player.speedBoostTime = 12;
+                    this.player.powerupMessage = '🚀 ' + powerup.func + ' Speed!';
+                    this.player.powerupMessageTime = 3;
+                } else if (powerup.type === 'shot') {
+                    this.player.shotSize = this.player.baseShotSize * 2.5;
+                    this.player.shotBoostTime = 15;
+                    this.player.powerupMessage = '📊 ' + powerup.func + ' Power!';
+                    this.player.powerupMessageTime = 3;
                 }
             },
 
             createPowerupEffect: function(x, y) {
-                for (let i = 0; i < 20; i++) {
-                    const angle = (i / 20) * Math.PI * 2;
-                    const speed = Math.random() * 200 + 100;
+                for (let i = 0; i < 25; i++) {
+                    const angle = (i / 25) * Math.PI * 2;
+                    const speed = Math.random() * 220 + 120;
                     this.particles.push({
                         x: x, y: y,
                         vx: Math.cos(angle) * speed,
                         vy: Math.sin(angle) * speed,
-                        life: Math.random() * 1.5 + 0.8,
-                        maxLife: Math.random() * 1.5 + 0.8,
-                        size: Math.random() * 5 + 3,
-                        color: [34, 197, 94]
+                        life: Math.random() * 1.8 + 1,
+                        maxLife: Math.random() * 1.8 + 1,
+                        size: Math.random() * 6 + 4,
+                        color: [112, 173, 71]
                     });
                 }
             },
 
-            createTransformationEffect: function(x, y) {
+            createFixEffect: function(x, y) {
+                for (let i = 0; i < 18; i++) {
+                    const angle = (i / 18) * Math.PI * 2;
+                    const speed = Math.random() * 180 + 80;
+                    this.particles.push({
+                        x: x, y: y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        life: Math.random() * 1.2 + 0.8,
+                        maxLife: Math.random() * 1.2 + 0.8,
+                        size: Math.random() * 5 + 3,
+                        color: [33, 115, 70]
+                    });
+                }
+            },
+
+            createCorruptionEffect: function(x, y) {
                 for (let i = 0; i < 15; i++) {
                     const angle = (i / 15) * Math.PI * 2;
-                    const speed = Math.random() * 150 + 50;
+                    const speed = Math.random() * 120 + 50;
                     this.particles.push({
                         x: x, y: y,
                         vx: Math.cos(angle) * speed,
@@ -984,161 +1113,40 @@ height: 900px;
                         life: Math.random() * 1 + 0.5,
                         maxLife: Math.random() * 1 + 0.5,
                         size: Math.random() * 4 + 2,
-                        color: [74, 222, 128]
-                    });
-                }
-            },
-
-            createOverwhelmEffect: function(x, y) {
-                for (let i = 0; i < 10; i++) {
-                    const angle = (i / 10) * Math.PI * 2;
-                    const speed = Math.random() * 100 + 30;
-                    this.particles.push({
-                        x: x, y: y,
-                        vx: Math.cos(angle) * speed,
-                        vy: Math.sin(angle) * speed,
-                        life: Math.random() * 0.8 + 0.3,
-                        maxLife: Math.random() * 0.8 + 0.3,
-                        size: Math.random() * 3 + 1,
-                        color: [255, 100, 100]
-                    });
-                }
-            },
-
-            spawnBoss: function() {
-                // Clear all existing enemies
-                this.negativeThoughts = [];
-                
-                // Create lightning effects
-                for (let i = 0; i < 10; i++) {
-                    this.lightningFlashes.push({
-                        x: Math.random() * this.width,
-                        y: Math.random() * this.height,
-                        width: 3 + Math.random() * 5,
-                        height: 50 + Math.random() * 100,
-                        life: 0.5 + Math.random() * 0.5,
-                        maxLife: 1,
-                        intensity: Math.random() * 0.8 + 0.2
-                    });
-                }
-                
-                // Create the boss
-                this.boss = {
-                    x: this.width / 2 - 60,
-                    y: this.height / 2 - 40,
-                    width: 120,
-                    height: 80,
-                    health: 50,
-                    maxHealth: 50,
-                    vx: 0,
-                    vy: 0,
-                    phase: 0,
-                    attackTimer: 0,
-                    pulsePhase: 0
-                };
-                
-                this.showSupportMessage();
-            },
-
-            updateBoss: function(deltaTime) {
-                if (!this.boss || this.boss.health <= 0) return;
-                
-                this.boss.phase += deltaTime;
-                this.boss.pulsePhase += deltaTime * 3;
-                this.boss.attackTimer += deltaTime;
-                
-                // Boss movement pattern
-                this.boss.x += Math.sin(this.boss.phase * 0.5) * 50 * deltaTime;
-                this.boss.y += Math.cos(this.boss.phase * 0.7) * 30 * deltaTime;
-                
-                // Keep boss on screen
-                this.boss.x = Math.max(20, Math.min(this.width - this.boss.width - 20, this.boss.x));
-                this.boss.y = Math.max(20, Math.min(this.height - this.boss.height - 20, this.boss.y));
-                
-                // Boss attacks - spawn negative thought projectiles
-                if (this.boss.attackTimer > 2) {
-                    this.spawnBossAttack();
-                    this.boss.attackTimer = 0;
-                }
-            },
-
-            spawnBossAttack: function() {
-                // Boss spawns multiple negative thoughts
-                const attacks = ['PANIC', 'FEAR', 'DREAD', 'TERROR'];
-                for (let i = 0; i < 3; i++) {
-                    const word = attacks[Math.floor(Math.random() * attacks.length)];
-                    this.negativeThoughts.push({
-                        x: this.boss.x + Math.random() * this.boss.width,
-                        y: this.boss.y + this.boss.height,
-                        vx: (Math.random() - 0.5) * 100,
-                        vy: Math.random() * 50 + 50,
-                        word: word,
-                        width: word.length * 12,
-                        height: 20,
-                        health: 2,
-                        maxHealth: 2,
-                        intensity: 1,
-                        wobble: Math.random() * Math.PI * 2,
-                        isStrong: true
-                    });
-                }
-            },
-
-            updateLightning: function(deltaTime) {
-                for (let i = this.lightningFlashes.length - 1; i >= 0; i--) {
-                    const lightning = this.lightningFlashes[i];
-                    lightning.life -= deltaTime;
-                    
-                    if (lightning.life <= 0) {
-                        this.lightningFlashes.splice(i, 1);
-                    }
-                }
-                
-                // Add occasional lightning during boss fight
-                if (this.boss && this.boss.health > 0 && Math.random() < 0.05) {
-                    this.lightningFlashes.push({
-                        x: Math.random() * this.width,
-                        y: 0,
-                        width: 2 + Math.random() * 3,
-                        height: this.height,
-                        life: 0.1 + Math.random() * 0.2,
-                        maxLife: 0.3,
-                        intensity: 0.8 + Math.random() * 0.2
+                        color: [255, 120, 120]
                     });
                 }
             },
 
             createBossDestroyEffect: function() {
-                // Epic boss destruction effect
-                for (let i = 0; i < 50; i++) {
+                for (let i = 0; i < 80; i++) {
                     this.particles.push({
                         x: this.boss.x + this.boss.width / 2,
                         y: this.boss.y + this.boss.height / 2,
-                        vx: (Math.random() - 0.5) * 400,
-                        vy: (Math.random() - 0.5) * 400,
-                        life: 2.0,
-                        maxLife: 2.0,
-                        size: Math.random() * 12 + 5,
-                        color: [255, 215, 0], // Gold particles
+                        vx: (Math.random() - 0.5) * 600,
+                        vy: (Math.random() - 0.5) * 600,
+                        life: 3.0,
+                        maxLife: 3.0,
+                        size: Math.random() * 16 + 8,
+                        color: [255, 215, 0],
                         type: 'explosion'
                     });
                 }
                 
-                // Clear all boss attacks
-                this.negativeThoughts = [];
+                this.excelErrors = [];
             },
 
             createHitEffect: function(x, y) {
-                for (let i = 0; i < 8; i++) {
+                for (let i = 0; i < 10; i++) {
                     this.particles.push({
                         x: x,
                         y: y,
-                        vx: (Math.random() - 0.5) * 150,
-                        vy: (Math.random() - 0.5) * 150,
-                        life: 0.4,
-                        maxLife: 0.4,
-                        size: Math.random() * 4 + 2,
-                        color: [255, 255, 100],
+                        vx: (Math.random() - 0.5) * 180,
+                        vy: (Math.random() - 0.5) * 180,
+                        life: 0.5,
+                        maxLife: 0.5,
+                        size: Math.random() * 5 + 3,
+                        color: [255, 255, 120],
                         type: 'hit'
                     });
                 }
@@ -1148,9 +1156,8 @@ height: 900px;
                 document.getElementById('score').textContent = this.score;
                 document.getElementById('lives').textContent = this.lives;
                 
-                // Update timer display (show "BOSS" when boss appears and timer stops)
                 if (this.timerStopped && this.boss && this.boss.health > 0) {
-                    document.getElementById('timer').textContent = 'BOSS';
+                    document.getElementById('timer').textContent = 'BOSS FIGHT!';
                 } else {
                     const timeLeft = Math.max(0, this.maxGameTime - this.gameTime);
                     const minutes = Math.floor(timeLeft / 60);
@@ -1158,28 +1165,36 @@ height: 900px;
                     document.getElementById('timer').textContent = minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
                 }
                 
-                document.getElementById('enemies').textContent = this.negativeThoughts.length;
+                document.getElementById('enemies').textContent = this.excelErrors.length;
+            },
+
+            gameLoop: function() {
+                const currentTime = Date.now();
+                const deltaTime = (currentTime - this.lastTime) / 1000;
+                this.lastTime = currentTime;
+
+                this.update(deltaTime);
+                this.render();
+
+                requestAnimationFrame(() => this.gameLoop());
             },
 
             render: function() {
-                // Clear with trail effect
-                this.ctx.fillStyle = 'rgba(15, 20, 25, 0.1)';
+                this.ctx.fillStyle = 'rgba(7, 16, 9, 0.15)';
                 this.ctx.fillRect(0, 0, this.width, this.height);
 
-                // Draw background
-                this.drawBackground();
+                this.drawSpreadsheet();
 
                 if (this.gameState !== 'playing') return;
 
-                // Draw all game objects
                 this.drawPlayer();
                 
-                for (let beam of this.focusBeams) {
-                    this.drawFocusBeam(beam);
+                for (let shot of this.formulaShots) {
+                    this.drawFormulaShot(shot);
                 }
                 
-                for (let thought of this.negativeThoughts) {
-                    this.drawNegativeThought(thought);
+                for (let error of this.excelErrors) {
+                    this.drawExcelError(error);
                 }
                 
                 for (let powerup of this.powerups) {
@@ -1190,69 +1205,31 @@ height: 900px;
                     this.drawParticle(particle);
                 }
                 
-                // Draw lightning effects
                 for (let lightning of this.lightningFlashes) {
                     this.drawLightning(lightning);
                 }
                 
-                // Draw boss
                 if (this.boss && this.boss.health > 0) {
                     this.drawBoss();
                 }
             },
 
-            drawBackground: function() {
-                if (this.backgroundTransition < 1) {
-                    this.drawNeuralNetwork();
-                }
-                if (this.backgroundTransition > 0) {
-                    this.drawZenClouds();
-                }
-            },
-
-            drawNeuralNetwork: function() {
-                // Draw connections
-                this.ctx.strokeStyle = 'rgba(74, 222, 128, 0.1)';
-                this.ctx.lineWidth = 1;
+            drawSpreadsheet: function() {
+                this.ctx.globalAlpha = 0.1;
                 
-                for (let connection of this.connections) {
-                    this.ctx.globalAlpha = connection.strength * 0.3;
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(connection.from.x, connection.from.y);
-                    this.ctx.lineTo(connection.to.x, connection.to.y);
-                    this.ctx.stroke();
-                }
-
-                // Draw neurons
-                for (let neuron of this.neurons) {
-                    const pulse = Math.sin(neuron.pulse) * 0.3 + 0.7;
-                    this.ctx.globalAlpha = neuron.brightness * pulse * 0.6;
-                    this.ctx.fillStyle = '#4ade80';
-                    this.ctx.beginPath();
-                    this.ctx.arc(neuron.x, neuron.y, neuron.size, 0, Math.PI * 2);
-                    this.ctx.fill();
-                }
-                
-                this.ctx.globalAlpha = 1;
-            },
-
-            drawZenClouds: function() {
-                this.ctx.globalAlpha = this.backgroundTransition * 0.6;
-                
-                for (let cloud of this.clouds) {
-                    const gradient = this.ctx.createRadialGradient(
-                        cloud.x, cloud.y, 0,
-                        cloud.x, cloud.y, cloud.size
-                    );
-                    
-                    gradient.addColorStop(0, 'rgba(200, 240, 200, ' + cloud.opacity + ')');
-                    gradient.addColorStop(0.6, 'rgba(150, 220, 150, ' + (cloud.opacity * 0.6) + ')');
-                    gradient.addColorStop(1, 'rgba(100, 200, 100, 0)');
-                    
-                    this.ctx.fillStyle = gradient;
-                    this.ctx.beginPath();
-                    this.ctx.arc(cloud.x, cloud.y, cloud.size, 0, Math.PI * 2);
-                    this.ctx.fill();
+                // Draw spreadsheet cells
+                for (let cell of this.spreadsheetCells) {
+                    if (cell.hasData) {
+                        const pulse = Math.sin(cell.pulse) * 0.3 + 0.7;
+                        this.ctx.globalAlpha = 0.05 * pulse;
+                        this.ctx.strokeStyle = '#217346';
+                        this.ctx.lineWidth = 1;
+                        this.ctx.strokeRect(cell.x, cell.y, cell.width, cell.height);
+                        
+                        this.ctx.fillStyle = '#217346';
+                        this.ctx.font = '8px Courier New';
+                        this.ctx.fillText(cell.value.toString().substring(0, 3), cell.x + 2, cell.y + 12);
+                    }
                 }
                 
                 this.ctx.globalAlpha = 1;
@@ -1261,145 +1238,82 @@ height: 900px;
             drawPlayer: function() {
                 const player = this.player;
                 
-                // Player ship glow effect
-                this.ctx.shadowColor = '#4ade80';
-                this.ctx.shadowBlur = player.invulnerable > 0 ? 20 : 10;
+                this.ctx.shadowColor = '#217346';
+                this.ctx.shadowBlur = player.invulnerable > 0 ? 25 : 12;
                 
-                // Draw pointy ship shape based on facing direction
-                this.ctx.fillStyle = player.invulnerable > 0 ? '#ffffff' : '#4ade80';
-                this.ctx.beginPath();
+                // Draw Excel icon as player
+                this.ctx.fillStyle = player.invulnerable > 0 ? '#ffffff' : '#217346';
+                this.ctx.font = 'bold 20px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('📊', player.x + player.width / 2, player.y + player.height - 2);
                 
-                const centerX = player.x + player.width / 2;
-                const centerY = player.y + player.height / 2;
-                const halfWidth = player.width / 2;
-                const halfHeight = player.height / 2;
-                
-                switch(player.facing) {
-                    case 'up':
-                        // Point up - triangle pointing up
-                        this.ctx.moveTo(centerX, player.y); // Top point
-                        this.ctx.lineTo(player.x, player.y + player.height); // Bottom left
-                        this.ctx.lineTo(centerX, player.y + halfHeight); // Middle
-                        this.ctx.lineTo(player.x + player.width, player.y + player.height); // Bottom right
-                        this.ctx.closePath();
-                        break;
-                    case 'down':
-                        // Point down - triangle pointing down
-                        this.ctx.moveTo(centerX, player.y + player.height); // Bottom point
-                        this.ctx.lineTo(player.x, player.y); // Top left
-                        this.ctx.lineTo(centerX, player.y + halfHeight); // Middle
-                        this.ctx.lineTo(player.x + player.width, player.y); // Top right
-                        this.ctx.closePath();
-                        break;
-                    case 'left':
-                        // Point left - triangle pointing left
-                        this.ctx.moveTo(player.x, centerY); // Left point
-                        this.ctx.lineTo(player.x + player.width, player.y); // Top right
-                        this.ctx.lineTo(player.x + halfWidth, centerY); // Middle
-                        this.ctx.lineTo(player.x + player.width, player.y + player.height); // Bottom right
-                        this.ctx.closePath();
-                        break;
-                    case 'right':
-                    default:
-                        // Point right - triangle pointing right
-                        this.ctx.moveTo(player.x + player.width, centerY); // Right point
-                        this.ctx.lineTo(player.x, player.y); // Top left
-                        this.ctx.lineTo(player.x + halfWidth, centerY); // Middle
-                        this.ctx.lineTo(player.x, player.y + player.height); // Bottom left
-                        this.ctx.closePath();
-                        break;
-                }
-                
-                this.ctx.fill();
-                
-                // Add engine glow at the back based on facing direction
-                this.ctx.fillStyle = player.invulnerable > 0 ? '#88ffff' : '#00ff88';
-                this.ctx.beginPath();
-                
-                switch(player.facing) {
-                    case 'up':
-                        this.ctx.arc(centerX, player.y + player.height + 2, 4, 0, Math.PI * 2);
-                        break;
-                    case 'down':
-                        this.ctx.arc(centerX, player.y - 2, 4, 0, Math.PI * 2);
-                        break;
-                    case 'left':
-                        this.ctx.arc(player.x + player.width + 2, centerY, 4, 0, Math.PI * 2);
-                        break;
-                    case 'right':
-                    default:
-                        this.ctx.arc(player.x - 2, centerY, 4, 0, Math.PI * 2);
-                        break;
-                }
-                
-                this.ctx.fill();
                 this.ctx.shadowBlur = 0;
                 
-                // Draw powerup message above the ship
+                // Draw powerup message
                 if (player.powerupMessage && player.powerupMessageTime > 0) {
-                    this.ctx.font = 'bold 14px Arial';
+                    this.ctx.font = 'bold 12px Arial';
                     this.ctx.textAlign = 'center';
-                    this.ctx.fillStyle = '#ffff00';
-                    this.ctx.shadowColor = '#ffff00';
-                    this.ctx.shadowBlur = 8;
+                    this.ctx.fillStyle = '#70ad47';
+                    this.ctx.shadowColor = '#70ad47';
+                    this.ctx.shadowBlur = 10;
                     
-                    // Floating effect - message bobs up and down
-                    const bobOffset = Math.sin(Date.now() * 0.005) * 3;
-                    const alpha = Math.min(player.powerupMessageTime / 0.5, 1); // Fade out in last 0.5 seconds
+                    const bobOffset = Math.sin(Date.now() * 0.006) * 4;
+                    const alpha = Math.min(player.powerupMessageTime / 0.7, 1);
                     
                     this.ctx.globalAlpha = alpha;
                     this.ctx.fillText(
                         player.powerupMessage,
-                        centerX,
-                        player.y - 10 + bobOffset
+                        player.x + player.width / 2,
+                        player.y - 12 + bobOffset
                     );
                     this.ctx.globalAlpha = 1;
                     this.ctx.shadowBlur = 0;
                 }
             },
 
-            drawFocusBeam: function(beam) {
-                const alpha = beam.life / beam.maxLife;
+            drawFormulaShot: function(shot) {
+                const alpha = shot.life / shot.maxLife;
                 this.ctx.globalAlpha = alpha;
-                this.ctx.fillStyle = '#4ade80';
-                this.ctx.shadowColor = '#4ade80';
-                this.ctx.shadowBlur = 8;
-                this.ctx.beginPath();
-                this.ctx.arc(beam.x, beam.y, beam.width, 0, Math.PI * 2);
-                this.ctx.fill();
+                this.ctx.fillStyle = '#217346';
+                this.ctx.shadowColor = '#217346';
+                this.ctx.shadowBlur = 12;
+                
+                // Draw formula symbol
+                this.ctx.font = 'bold 12px Courier New';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText(shot.formula, shot.x, shot.y);
+                
                 this.ctx.shadowBlur = 0;
                 this.ctx.globalAlpha = 1;
             },
 
-            drawNegativeThought: function(thought) {
-                // Draw stronger enemies with different visual style
-                const isStrong = thought.health > 1;
-                this.ctx.fillStyle = isStrong ? '#cc3333' : '#ff6b6b';
-                this.ctx.font = isStrong ? 'bold 18px Courier New' : '16px Courier New';
+            drawExcelError: function(error) {
+                const isStrong = error.health > 1;
+                this.ctx.fillStyle = isStrong ? '#cc0000' : '#ff6666';
+                this.ctx.font = isStrong ? 'bold 14px Courier New' : '12px Courier New';
                 this.ctx.textAlign = 'center';
                 
-                const wobbleOffset = Math.sin(thought.wobble) * 2;
-                const alpha = thought.intensity;
+                const wobbleOffset = Math.sin(error.wobble) * 2;
+                const alpha = error.intensity;
                 
                 this.ctx.globalAlpha = alpha;
-                this.ctx.shadowColor = isStrong ? '#cc3333' : '#ff6b6b';
-                this.ctx.shadowBlur = isStrong ? 10 : 5;
+                this.ctx.shadowColor = isStrong ? '#cc0000' : '#ff6666';
+                this.ctx.shadowBlur = isStrong ? 15 : 8;
                 
-                // Draw stronger enemies with outline
                 if (isStrong) {
                     this.ctx.strokeStyle = '#ffffff';
                     this.ctx.lineWidth = 1;
                     this.ctx.strokeText(
-                        thought.word,
-                        thought.x + thought.width / 2,
-                        thought.y + thought.height / 2 + wobbleOffset
+                        error.error,
+                        error.x + error.width / 2,
+                        error.y + error.height / 2 + wobbleOffset
                     );
                 }
                 
                 this.ctx.fillText(
-                    thought.word,
-                    thought.x + thought.width / 2,
-                    thought.y + thought.height / 2 + wobbleOffset
+                    error.error,
+                    error.x + error.width / 2,
+                    error.y + error.height / 2 + wobbleOffset
                 );
                 
                 this.ctx.shadowBlur = 0;
@@ -1407,27 +1321,27 @@ height: 900px;
             },
 
             drawPowerup: function(powerup) {
-                const pulse = Math.sin(powerup.pulse) * 0.3 + 0.7;
-                this.ctx.fillStyle = '#22c55e';
-                this.ctx.font = '14px Courier New';
+                const pulse = Math.sin(powerup.pulse) * 0.4 + 0.8;
+                this.ctx.fillStyle = '#70ad47';
+                this.ctx.font = 'bold 12px Courier New';
                 this.ctx.textAlign = 'center';
                 this.ctx.globalAlpha = pulse;
-                this.ctx.shadowColor = '#22c55e';
-                this.ctx.shadowBlur = 12;
+                this.ctx.shadowColor = '#70ad47';
+                this.ctx.shadowBlur = 15;
                 
                 this.ctx.fillText(
-                    powerup.word,
+                    powerup.func,
                     powerup.x + powerup.width / 2,
                     powerup.y + powerup.height / 2
                 );
                 
                 // Draw icon
-                this.ctx.font = '12px Arial';
-                const icon = powerup.type === 'speed' ? '⚡' : '🎯';
+                this.ctx.font = '10px Arial';
+                const icon = powerup.type === 'speed' ? '🚀' : '📊';
                 this.ctx.fillText(
                     icon,
                     powerup.x + powerup.width / 2,
-                    powerup.y - 5
+                    powerup.y - 8
                 );
                 
                 this.ctx.shadowBlur = 0;
@@ -1449,36 +1363,38 @@ height: 900px;
             drawBoss: function() {
                 if (!this.boss || this.boss.health <= 0) return;
                 
-                // Boss pulsing effect
-                const pulse = Math.sin(this.boss.pulsePhase) * 0.2 + 0.8;
+                const pulse = Math.sin(this.boss.pulsePhase) * 0.3 + 0.7;
                 const healthRatio = this.boss.health / this.boss.maxHealth;
                 
-                // Boss body - dark menacing shape
+                // Boss body - menacing parenthesis
                 this.ctx.fillStyle = `rgba(139, 0, 0, ${pulse})`;
                 this.ctx.shadowColor = '#8b0000';
-                this.ctx.shadowBlur = 20;
-                this.ctx.fillRect(this.boss.x, this.boss.y, this.boss.width, this.boss.height);
+                this.ctx.shadowBlur = 25;
                 
-                // Boss eyes - glowing red
+                // Draw giant opening parenthesis
+                this.ctx.font = 'bold 80px Courier New';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('(', this.boss.x + 40, this.boss.y + 60);
+                
+                // Draw menacing "missing closing parenthesis" text
+                this.ctx.font = 'bold 12px Courier New';
                 this.ctx.fillStyle = `rgba(255, 0, 0, ${pulse})`;
-                this.ctx.shadowColor = '#ff0000';
-                this.ctx.shadowBlur = 15;
-                this.ctx.beginPath();
-                this.ctx.arc(this.boss.x + 30, this.boss.y + 25, 8, 0, Math.PI * 2);
-                this.ctx.arc(this.boss.x + 90, this.boss.y + 25, 8, 0, Math.PI * 2);
-                this.ctx.fill();
+                this.ctx.fillText('MISSING )', this.boss.x + this.boss.width / 2, this.boss.y + 85);
+                
+                // Draw boss name
+                this.ctx.font = 'bold 10px Arial';
+                this.ctx.fillStyle = '#ff0000';
+                this.ctx.fillText(this.boss.name, this.boss.x + this.boss.width / 2, this.boss.y - 10);
                 
                 // Health bar
                 const barWidth = this.boss.width;
-                const barHeight = 6;
+                const barHeight = 8;
                 const barX = this.boss.x;
-                const barY = this.boss.y - 15;
+                const barY = this.boss.y - 25;
                 
-                // Health bar background
                 this.ctx.fillStyle = 'rgba(100, 0, 0, 0.8)';
                 this.ctx.fillRect(barX, barY, barWidth, barHeight);
                 
-                // Health bar fill
                 this.ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';
                 this.ctx.fillRect(barX, barY, barWidth * healthRatio, barHeight);
                 
@@ -1490,115 +1406,23 @@ height: 900px;
                 this.ctx.globalAlpha = alpha * lightning.intensity;
                 this.ctx.fillStyle = '#ffffff';
                 this.ctx.shadowColor = '#ffffff';
-                this.ctx.shadowBlur = 10;
+                this.ctx.shadowBlur = 15;
                 
-                // Draw jagged lightning bolt
                 this.ctx.fillRect(lightning.x, lightning.y, lightning.width, lightning.height);
                 
-                // Add some randomness to make it flicker
-                if (Math.random() < 0.3) {
-                    this.ctx.fillRect(lightning.x - 2, lightning.y, lightning.width + 4, lightning.height);
+                if (Math.random() < 0.4) {
+                    this.ctx.fillRect(lightning.x - 3, lightning.y, lightning.width + 6, lightning.height);
                 }
                 
                 this.ctx.shadowBlur = 0;
                 this.ctx.globalAlpha = 1;
-            },
-
-            drawHeavenScene: function() {
-                const heavenCanvas = document.getElementById('heavenCanvas');
-                if (!heavenCanvas) return;
-                
-                const heavenCtx = heavenCanvas.getContext('2d');
-                heavenCtx.clearRect(0, 0, heavenCanvas.width, heavenCanvas.height);
-                
-                // Create heavenly gradient background
-                const gradient = heavenCtx.createLinearGradient(0, 0, 0, heavenCanvas.height);
-                gradient.addColorStop(0, '#87CEEB'); // Sky blue
-                gradient.addColorStop(0.3, '#98E4FF'); // Light blue
-                gradient.addColorStop(0.7, '#F0F8FF'); // Alice blue
-                gradient.addColorStop(1, '#FFFACD'); // Lemon chiffon
-                
-                heavenCtx.fillStyle = gradient;
-                heavenCtx.fillRect(0, 0, heavenCanvas.width, heavenCanvas.height);
-                
-                // Draw floating heavenly clouds
-                const cloudCount = 12;
-                for (let i = 0; i < cloudCount; i++) {
-                    const x = (i * heavenCanvas.width / cloudCount) + Math.sin(Date.now() * 0.001 + i) * 30;
-                    const y = 100 + Math.sin(Date.now() * 0.0008 + i * 2) * 50;
-                    const size = 40 + Math.sin(Date.now() * 0.0005 + i) * 20;
-                    
-                    this.drawHeavenCloud(heavenCtx, x, y, size);
-                }
-                
-                // Draw light rays
-                for (let i = 0; i < 8; i++) {
-                    const x = i * heavenCanvas.width / 8;
-                    const alpha = 0.1 + Math.sin(Date.now() * 0.002 + i) * 0.05;
-                    
-                    const rayGradient = heavenCtx.createLinearGradient(x, 0, x, heavenCanvas.height);
-                    rayGradient.addColorStop(0, `rgba(255, 255, 255, ${alpha})`);
-                    rayGradient.addColorStop(0.5, `rgba(255, 255, 255, ${alpha * 0.5})`);
-                    rayGradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
-                    
-                    heavenCtx.fillStyle = rayGradient;
-                    heavenCtx.fillRect(x, 0, 20, heavenCanvas.height);
-                }
-                
-                // Add floating golden particles
-                for (let i = 0; i < 20; i++) {
-                    const x = Math.random() * heavenCanvas.width;
-                    const y = Math.random() * heavenCanvas.height;
-                    const alpha = 0.3 + Math.sin(Date.now() * 0.003 + i) * 0.3;
-                    
-                    heavenCtx.fillStyle = `rgba(255, 215, 0, ${alpha})`;
-                    heavenCtx.beginPath();
-                    heavenCtx.arc(x, y, 2, 0, Math.PI * 2);
-                    heavenCtx.fill();
-                }
-                
-                // Animate the scene
-                setTimeout(() => {
-                    if (this.gameState === 'victory') {
-                        this.drawHeavenScene();
-                    }
-                }, 50);
-            },
-
-            drawHeavenCloud: function(ctx, x, y, size) {
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-                ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
-                ctx.shadowBlur = 20;
-                
-                // Draw cloud with multiple overlapping circles
-                const circles = 5;
-                for (let i = 0; i < circles; i++) {
-                    const offsetX = (i - 2) * size * 0.3;
-                    const offsetY = Math.sin(i) * size * 0.2;
-                    const circleSize = size * (0.6 + Math.sin(i) * 0.2);
-                    
-                    ctx.beginPath();
-                    ctx.arc(x + offsetX, y + offsetY, circleSize, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                
-                ctx.shadowBlur = 0;
-            },
-
-            gameLoop: function() {
-                const currentTime = performance.now();
-                const deltaTime = Math.min((currentTime - this.lastTime) / 1000, 0.016);
-                this.lastTime = currentTime;
-
-                this.update(deltaTime);
-                this.render();
-
-                requestAnimationFrame(() => this.gameLoop());
             }
         };
 
-        // Initialize the game when page loads
-        game.init();
+        // Initialize the game
+        window.addEventListener('DOMContentLoaded', () => {
+            game.init();
+        });
     </script>
 </body>
 </html>
