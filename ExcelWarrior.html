@@ -248,7 +248,8 @@
                 <br>
                 💡 <span style="color: #70ad47;">Collect Excel Functions for Power-ups!</span> 💡<br>
                 <br>
-                <span style="color: #217346;">Press SPACEBAR to Enter the Spreadsheet</span>
+                <span style="color: #217346;">Press SPACEBAR to Enter the Spreadsheet</span><br>
+                <span style="color: #70ad47; font-size: 12px;">(or click here if spacebar doesn't work)</span>
             </div>
         </div>
 
@@ -331,13 +332,24 @@
             ],
 
             init: function() {
+                console.log('Initializing Excel Warrior...');
                 this.canvas = document.getElementById('gameCanvas');
                 this.ctx = this.canvas.getContext('2d');
+                
+                if (!this.canvas || !this.ctx) {
+                    console.error('Canvas or context not found!');
+                    return;
+                }
+                
+                console.log('Canvas found, setting up game...');
                 this.initializeSpreadsheet();
                 this.setupEventListeners();
                 this.createPlayer();
                 this.updateTimerDisplay();
+                this.lastTime = Date.now();
+                console.log('Game initialized, starting game loop...');
                 this.gameLoop();
+                console.log('Excel Warrior ready! Press SPACEBAR to start.');
             },
 
             initializeSpreadsheet: function() {
@@ -359,12 +371,16 @@
             },
 
             setupEventListeners: function() {
+                console.log('Setting up event listeners...');
                 document.addEventListener('keydown', (e) => {
+                    console.log('Key pressed:', e.code, 'Game state:', this.gameState);
                     this.keys[e.code] = true;
                     
                     if (e.code === 'Space') {
                         e.preventDefault();
+                        console.log('Spacebar pressed in state:', this.gameState);
                         if (this.gameState === 'start') {
+                            console.log('Starting game...');
                             this.startGame();
                         } else if (this.gameState === 'gameOver') {
                             this.restartGame();
@@ -389,6 +405,28 @@
                 document.addEventListener('keyup', (e) => {
                     this.keys[e.code] = false;
                 });
+                
+                // Add click backup for starting the game
+                document.getElementById('startScreen').addEventListener('click', () => {
+                    if (this.gameState === 'start') {
+                        console.log('Starting game via click...');
+                        this.startGame();
+                    }
+                });
+                
+                document.getElementById('gameOverScreen').addEventListener('click', () => {
+                    if (this.gameState === 'gameOver') {
+                        this.restartGame();
+                    }
+                });
+                
+                document.getElementById('victoryScreen').addEventListener('click', () => {
+                    if (this.gameState === 'victory') {
+                        this.restartGame();
+                    }
+                });
+                
+                console.log('Event listeners set up successfully!');
             },
 
             selectPreviousTimer: function() {
@@ -436,6 +474,7 @@
             },
 
             startGame: function() {
+                console.log('Starting game with timer:', this.selectedTime, 'minutes');
                 this.gameState = 'playing';
                 this.score = 0;
                 this.lives = 3;
@@ -457,6 +496,7 @@
                 document.getElementById('startScreen').style.display = 'none';
                 document.getElementById('gameOverScreen').style.display = 'none';
                 document.getElementById('victoryScreen').style.display = 'none';
+                console.log('Game started successfully!');
             },
 
             restartGame: function() {
@@ -1170,7 +1210,7 @@
 
             gameLoop: function() {
                 const currentTime = Date.now();
-                const deltaTime = (currentTime - this.lastTime) / 1000;
+                const deltaTime = Math.min((currentTime - this.lastTime) / 1000, 0.1); // Cap deltaTime
                 this.lastTime = currentTime;
 
                 this.update(deltaTime);
@@ -1421,8 +1461,20 @@
 
         // Initialize the game
         window.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, initializing game...');
             game.init();
         });
+
+        // Also try to initialize if DOM is already loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                console.log('DOM loaded (backup), initializing game...');
+                game.init();
+            });
+        } else {
+            console.log('DOM already loaded, initializing game immediately...');
+            setTimeout(() => game.init(), 100);
+        }
     </script>
 </body>
 </html>
