@@ -20,7 +20,7 @@
         #gameContainer {
             position: relative;
             width: 800px;
-            height: 900px;
+            height: 600px;
             border: 3px solid #217346;
             box-shadow: 
                 0 0 30px rgba(33, 115, 70, 0.6),
@@ -33,7 +33,7 @@
             display: block;
             background: transparent;
             border: none;
-            height: 900px;
+            height: 600px;
         }
 
         #ui {
@@ -155,17 +155,22 @@
 
         .excel-tip {
             position: absolute;
-            color: rgba(112, 173, 71, 0.9);
-            font-size: 14px;
-            font-weight: bold;
+            color: rgba(112, 173, 71, 0.25);
+            font-size: 12px;
+            font-weight: normal;
             pointer-events: none;
-            text-shadow: 0 0 8px rgba(112, 173, 71, 0.8);
-            animation: tipPulse 2s ease-in-out infinite;
+            text-shadow: 0 0 3px rgba(112, 173, 71, 0.3);
+            animation: tipFloat 3s ease-in-out infinite;
+            background: rgba(0, 0, 0, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(112, 173, 71, 0.2);
+            backdrop-filter: blur(2px);
         }
 
-        @keyframes tipPulse {
-            0%, 100% { transform: scale(1); opacity: 0.9; }
-            50% { transform: scale(1.1); opacity: 1; }
+        @keyframes tipFloat {
+            0%, 100% { transform: translateY(0px); opacity: 0.25; }
+            50% { transform: translateY(-5px); opacity: 0.4; }
         }
 
         .timer-option {
@@ -1281,11 +1286,31 @@
                 this.ctx.shadowColor = '#217346';
                 this.ctx.shadowBlur = player.invulnerable > 0 ? 25 : 12;
                 
-                // Draw Excel icon as player
+                // Draw Excel cursor as player (thick plus/cross symbol like Excel cell cursor)
+                const centerX = player.x + player.width / 2;
+                const centerY = player.y + player.height / 2;
+                const size = 12;
+                
+                // Set color and styling
+                this.ctx.strokeStyle = player.invulnerable > 0 ? '#ffffff' : '#217346';
                 this.ctx.fillStyle = player.invulnerable > 0 ? '#ffffff' : '#217346';
-                this.ctx.font = 'bold 20px Arial';
-                this.ctx.textAlign = 'center';
-                this.ctx.fillText('📊', player.x + player.width / 2, player.y + player.height - 2);
+                this.ctx.lineWidth = 3;
+                this.ctx.lineCap = 'round';
+                
+                // Draw cursor - thick plus sign
+                this.ctx.beginPath();
+                // Vertical line
+                this.ctx.moveTo(centerX, centerY - size);
+                this.ctx.lineTo(centerX, centerY + size);
+                // Horizontal line
+                this.ctx.moveTo(centerX - size, centerY);
+                this.ctx.lineTo(centerX + size, centerY);
+                this.ctx.stroke();
+                
+                // Add small center dot for better visibility
+                this.ctx.beginPath();
+                this.ctx.arc(centerX, centerY, 2, 0, Math.PI * 2);
+                this.ctx.fill();
                 
                 this.ctx.shadowBlur = 0;
                 
