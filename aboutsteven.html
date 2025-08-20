@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About Me - Career Solutions for Today</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #ffffff;
+      scroll-behavior: smooth;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .profile-image {
+      border-radius: 50%;
+      width: 200px;
+      height: 200px;
+      object-fit: cover;
+      margin-bottom: 20px;
+    }
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  text-align: left;
+}
+   .my-bio {
+      color: #000 !important;
+      font-size: 20px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      text-align: justify;
+    }
+
+   .about-divider {
+      border-top: 2px solid black;
+      margin: 25px auto 20px auto;
+      width: 60%;
+    }
+
+.about-flex {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+}
+.profile-text {
+  max-width: 600px;
+}
+
+
+.bio-skills {
+  display: flex;
+  flex-direction: row;
+  gap: 40px;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+}
+.about-text-block {
+  flex: 1 1 0;
+  min-width: 260px;
+  max-width: 600px;
+}
+
+.skills-container {
+  flex: 2 1 0;
+  min-width: 220px;
+  max-width: 350px;
+  margin: 0 0 0 0;
+}
+
+
+.interests::before,
+.volunteer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 0;
+}
+
+
+
+
+    h1 {
+      font-size: 50px;
+      color: #0b4f6c;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 28px;
+      color: #0b4f6c;
+      margin-bottom: 20px;
+    }
+
+    .about-text {
+      font-size: 18px;
+      color: #333;
+      line-height: 1.6;
+      max-width: 800px;
+      margin: 0 auto 30px;
+    }
+
+    .social-icons {
+      margin-top: 20px;
+    }
+
+    .social-icons a {
+      margin: 0 10px;
+      display: inline-block;
+    }
+  .social-icons { 
+    display: flex; gap: 15px; justify-content: center;
+   }
+    .social-icons img { 
+      height: 50px;
+    }
+
+
+
+
+    section {
+      padding: 60px 20px;
+      color: white;
+      text-align: center;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      position: relative;
+    }
+
+.interests::before,
+.volunteer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 0;
+}
+
+.interests,
+.volunteer {
+  padding: 120px 20px;      /* Increase vertical space */
+  min-height: 500px;        /* Minimum height for tall sections */
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+
+
+    section > * {
+      position: relative;
+      z-index: 2;
+    }
+
+    .section-title {
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+
+    .section-content {
+      font-size: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background-color: #0b4f6c;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 15px 30px;
+  z-index: 999;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.navbar-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.nav-logo {
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+  margin-right: 20px;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  position: fixed;
+  gap: 15px;
+  right: 30px;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+}
+
+.nav-links li a {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.hamburger {
+  display: none;
+  cursor: pointer;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* three horizontal bars */
+.hamburger div {
+  width: 25px;
+  height: 3px;
+  background-color: white;
+  border-radius: 2px;
+}
+
+
+      .interests .section-content,
+.volunteer .section-content {
+  position: relative;        /* lift above the overlay */
+  z-index: 1;
+
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(1px);
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  padding: 20px;
+  color: #fff;    
+}
+.interests .section-title,
+.volunteer .section-title {
+  color: #fff !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+
+.skills-container {
+  max-width: 400px;
+ text-align: center;
+
+}
+
+.skill {
+  margin-bottom: 20px;
+}
+
+.skill span {
+  font-size: 18px;
+  color: #333;
+  display: block;
+  margin-bottom: 6px;
+  text-align: left;
+}
+
+.skill-bar {
+  width: 100%;
+  background-color: #ddd;
+  border-radius: 20px;
+  overflow: hidden;
+  height: 20px;
+}
+
+.skill-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #64b5f6 0%, #0b4f6c 100%);
+  width: 0;
+  border-radius: 20px;
+  animation: fillSkill 2s ease-out forwards;
+}
+
+@keyframes fillSkill {
+  0% { width: 0; }
+  100% { width: var(--fill); }
+}
+
+
+
+/* About Me active nav link styling */
+.nav-links li a.about-underline {
+  position: relative;
+  display: inline-block;
+  transition: color 0.3s;
+}
+.nav-links li a.about-underline::after,
+.nav-links li a.about-underline::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to right, #00ffa6, #00ffa6);
+  left: 0;
+  transform: scaleX(0);
+  transition: transform 0.4s cubic-bezier(.77,0,.18,1);
+}
+.nav-links li a.about-underline.active::before,
+.nav-links li a.about-underline.active::after {
+  transform: scaleX(1);
+}
+.nav-links li a.about-underline::before {
+  top: -2px;
+  transform-origin: left;
+}
+.nav-links li a.about-underline::after {
+  bottom: -5px;
+  transform-origin: right;
+}
+
+@media (max-width: 768px) {
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+  }
+ 
+
+
+  .bio-skills {
+    flex-direction: column;
+  }
+  .about-text-block {
+    order: 1; /* Show summary first */
+  }
+  .skills-container {
+    order: 2; /* Show skills second */
+  }
+
+
+    nav.navbar {
+    height: 70px;
+  }
+
+
+    .bio-skills {
+    flex-direction: column;
+    gap: 30px;
+    align-items: stretch;
+  }
+  .about-text-block, .skills-container {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+ 
+     .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #0b4f6c;
+    padding: 10px 15px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    justify-content: flex-start;
+    display: flex;
+    height: 70px;
+    flex-wrap: wrap;
+    align-items: center;
+    z-index: 999;
+    box-sizing: border-box;
+  }
+
+  .hamburger {
+    order: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    cursor: pointer;
+    margin-right: 15px;
+    margin-left: 10px; /* space between icon & title */
+  }
+
+  .nav-logo {
+    order: 2;
+    flex: 1;
+    text-align: center;
+    margin: 0;
+    font-size: 20px;
+  }
+
+  .nav-links {
+    order: 4;
+    position: static !important;
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    background-color: #0b4f6c;
+    margin-top: 10px;
+    padding: 0;
+    gap: 0px;
+  }
+
+  .nav-links.active {
+    display: flex;
+  
+  }
+  .nav-links.open {
+    display: flex;
+  }
+  .nav-links li {
+    width: 100%;
+    text-align: center;
+     border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin: 0;
+    padding: 0;
+  }
+  .nav-links li a {
+    display: block;
+    width: 100%;
+    padding: 16px 0;
+    color: #fff;
+    text-decoration: none;
+    font-size: 18px;
+  }
+ .volunteer {
+    background-image: url('https://raw.githubusercontent.com/StevenMKay/CareerSolutionsForToday/ed660eff2c3da0107a5dd65e351f8d109366696d/photos/mobilephotovolunteer.png') !important;
+    background-size: cover !important;
+    background-position: center center !important;
+  }
+
+  }
+  
+
+      .interests .section-content,
+.volunteer .section-content {
+  position: relative;        /* lift above the overlay */
+  z-index: 1;
+
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(1px);
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  padding: 20px;
+  color: #fff;    
+}
+
+
+ 
+
+  .interests, .volunteer {
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+      background-size: cover;
+      background-position: center;
+     padding: 40px 10px !important;
+    }
+
+/* Recent Rescues Video Container - Similar to index.html but taller for YouTube shorts */
+.recent-rescues-container {
+  margin: 30px auto 0 auto;
+  background: rgba(255,255,255,0.18);
+  border-radius: 18px;
+  box-shadow: 0 2px 18px rgba(0,0,0,0.13);
+  padding: 18px 18px 10px 18px;
+  max-width: 900px;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  color: #fff;
+  position: relative;
+  z-index: 2;
+}
+
+.recent-rescues-container h3 {
+  margin: 0 0 12px 0;
+  color: #fff;
+  font-size: 22px;
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+.recent-rescues-scroll {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: #fff #eee;
+}
+
+.recent-rescue-card {
+  min-width: 200px;
+  max-width: 220px;
+  background: rgba(255,255,255,0.10);
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.10);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: box-shadow 0.2s;
+  color: #fff;
+}
+
+.recent-rescue-card img {
+  width: 100%;
+  height: 160px; /* Taller for YouTube shorts - increased from 110px */
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.recent-rescue-card h4 {
+  font-size: 15px;
+  margin: 0 0 6px 0;
+  color: #fff;
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+.recent-rescue-card a {
+  color: #fff;
+  text-decoration: underline;
+  font-size: 12px;
+  font-weight: bold;
+  margin-top: auto; /* This pushes the link to the bottom */
+  margin-bottom: 0;
+}
+
+.recent-rescues-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.recent-rescues-scroll::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.1);
+  border-radius: 6px;
+}
+
+.recent-rescues-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.3);
+  border-radius: 6px;
+}
+
+.recent-rescues-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.5);
+}
+
+
+
+  </style>
+</head>
+<body>
+
+
+<nav class="navbar">
+  <div class="nav-logo">Career Solutions for Today</div>
+
+  <!-- Hamburger menu for mobile -->
+  <div class="hamburger">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+
+  <!-- Search input -->
+  <div class="nav-controls">
+
+  </div>
+
+  <!-- Navigation links -->
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    
+    <li><a href="Templates.html">Templates</a></li>
+    <li><a href="Learn.html" class="learn-underline">Learn</a></li>
+    <li><a href="practice.html">Practice</a></li>
+    <li><a href="codeplayground.html">Code Playground</a></li>
+    <li><a href="AboutMe.html" class="about-underline active">About Me</a></li>
+  </ul>
+</nav>
+
+
+<section id="about" style="margin-top:90px;">
+  <div class="about-container">
+    <img class="profile-image" src="https://raw.githubusercontent.com/StevenMKay/CareerSolutionsForToday/4ff75cfdc51f0658d186cd14a87f0710808b40aa/Thumbnails/HeadshotImage.png" alt="Profile" />
+    <div class="about-flex">
+      <h1>Steven Kay</h1>
+        <div class="about-divider"></div>
+<div class="bio-skills">
+  <div class="skills-container">
+    <h2 style="color: #0b4f6c; margin-top: 0;">Skills</h2>
+ 
+    <div class="skill">
+      <span>Excel</span>
+      <div class="skill-bar"><div class="skill-fill" style="--fill: 95%"></div></div>
+    </div>
+
+    <div class="skill">
+      <span>PowerPoint</span>
+      <div class="skill-bar"><div class="skill-fill" style="--fill: 95%"></div></div>
+    </div>
+
+ <div class="skill">
+      <span>Executive Presentations</span>
+      <div class="skill-bar"><div class="skill-fill" style="--fill: 90%"></div></div>
+    </div>
+
+
+ <div class="skill">
+      <span>Data Analytics</span>
+      <div class="skill-bar"><div class="skill-fill" style="--fill: 90%"></div></div>
+    </div>
+
+   <div class="skill">
+      <span>Project Management</span>
+      <div class="skill-bar"><div class="skill-fill" style="--fill: 90%"></div></div>
+    </div>
+   <div class="skill">
+      <span>Training & Development</span>
+      <div class="skill-bar"><div class="skill-fill" style="--fill: 90%"></div></div>
+    </div>
+
+
+<div class="skill">
+      <span>Risk Management</span>
+      <div class="skill-bar"><div class="skill-fill" style="--fill: 85%"></div></div>
+    </div>
+
+     <div class="skill">
+      <span>Website Design</span>
+      <div class="skill-bar"><div class="skill-fill" style="--fill: 80%"></div></div>
+    </div>
+    <div class="skill">
+      <span>Tableau</span>
+      <div class="skill-bar"><div class="skill-fill" style="--fill: 80%"></div></div>
+    </div>
+    <div class="skill">
+      <span>Power BI</span>
+      <div class="skill-bar"><div class="skill-fill" style="--fill: 75%"></div></div>
+    </div>
+
+
+ 
+    <div class="skill">
+      <span>SQL</span>
+      <div class="skill-bar"><div class="skill-fill" style="--fill: 75%"></div></div>
+    </div>
+    <div class="skill">
+      <span>Python</span>
+      <div class="skill-bar"><div class="skill-fill" style="--fill: 65%"></div></div>
+    </div>
+
+ 
+  </div>
+  <div class="about-text-block">
+      <h2 style="color: #0b4f6c; margin-top: 0;">Professional Summary</h2>
+    <p class="my-bio">
+      With a career rooted in finance and business strategy, Steven Kay brings over two decades of multifaceted experience across reporting and analytics, sales, training, credit underwriting, management, and project leadership. A dynamic and results-oriented professional, Steven has consistently led initiatives that blend innovation, efficiency, and purpose—driving measurable improvement in business operations while inspiring and developing the people around him.
+    </p>
+    <p class="my-bio">
+      Steven's strength lies not just in data and decision-making but in empowering others. From managing high-impact projects and training programs to building strategic communication platforms and leading process optimization, his focus remains steadfast: creating systems that help others grow, thrive, and succeed.
+    </p>
+    <p class="my-bio">
+      Steven is deeply committed to community leadership and volunteerism, driven by a genuine desire to serve and uplift others. This passion is what inspired the creation of this site—an extension of his belief that professional tools and skills should be accessible, practical, and empowering for everyone.
+    </p>
+    <p class="my-bio">
+      With a solid foundation in organizational leadership and technical skills spanning Excel, SQL, Python, Tableau, Power BI, and SharePoint, Steven blends analytical expertise with human-centered impact. Whether it's designing a training module or crafting an executive report, his approach is clear: lead with purpose, execute with precision, and always focus on making a difference.
+    </p>
+  </div>
+</div>
+    <div class="about-divider"></div>
+
+      <div class="social-icons">
+        <a href="https://www.youtube.com/@CareerSolutionsforToday" target="_blank">
+          <img class="youtube" src="https://raw.githubusercontent.com/StevenMKay/CareerSolutionsForToday/e78e9a4de4c8677f0934af550a36473b699011a8/icons/youtubeperficon.png" alt="YouTube" />
+        </a>
+        <a href="https://linkedin.com/in/stevenmichaelkay" target="_blank">
+          <img src="https://raw.githubusercontent.com/StevenMKay/CareerSolutionsForToday/e78e9a4de4c8677f0934af550a36473b699011a8/icons/linkedinperficon.png" alt="LinkedIn" />
+        </a>
+        <a href="https://www.instagram.com/stevenkayhiker" target="_blank" class="instagram">
+          <img src="https://raw.githubusercontent.com/StevenMKay/CareerSolutionsForToday/e78e9a4de4c8677f0934af550a36473b699011a8/icons/instaperficon.png" alt="Instagram" />
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  <!-- Volunteer Work -->
+  <section class="volunteer" style="background-image: url('https://raw.githubusercontent.com/StevenMKay/CareerSolutionsForToday/229c111d0adefe59ef39530d87c08c2886ac003a/photos/volunteerbackground5.png');">
+    <h2 class="section-title">Volunteer Work</h2>
+    <div class="section-content">
+      Giving back to the Arizona community is a core value. I dedicate my time after work and on weekends to rescue wild birds of prey and bring them in for medical care. You can see some of my rescues on my Instagram page.
+    </div>
+    
+    <!-- Recent Rescues Video Container -->
+    <div class="recent-rescues-container">
+      <h3>Recent Rescues</h3>
+      <div class="recent-rescues-scroll" id="recentRescues"></div>
+    </div>
+  </section>
+
+</body>
+
+<script>
+// Recent Rescues data - defined locally in AboutMe.html
+const recentRescues = [
+{
+    id: 'rescue-003', 
+    title: 'Great Horned Owl Net Rescue',
+    description: 'Rescue of a great horned owl that was trapped in a net in Phoenix, Arizona',
+    url: 'https://youtube.com/shorts/cIm6UCsOM18?feature=share',
+    thumbnail: 'https://raw.githubusercontent.com/StevenMKay/CareerSolutionsForToday/31921abb4ebab111e4a74f34a374630175ca6d44/Thumbnails/owlrescueimg.jpg',
+    type: 'rescue_video',
+    section: 'Volunteer Work'
+  } ,
+
+{
+    id: 'rescue-001',
+    title: 'Pelican Rescue',
+    description: 'Rescuing an injured pelican from the Arizona heat',
+    url: 'https://youtube.com/shorts/IFwcH-kLwpM?feature=share',
+    thumbnail: 'https://img.youtube.com/vi/IFwcH-kLwpM/maxresdefault.jpg',
+    type: 'rescue_video',
+    section: 'Volunteer Work'
+  },
+  {
+    id: 'rescue-002', 
+    title: 'Great Horned Owl Rescue',
+    description: 'Rescue of a great horned owl in distress in Phoenix, Arizona',
+    url: 'https://youtube.com/shorts/yjvFRXM72AE?feature=share',
+    thumbnail: 'https://img.youtube.com/vi/yjvFRXM72AE/maxresdefault.jpg',
+    type: 'rescue_video',
+    section: 'Volunteer Work'
+  }
+
+
+
+
+];
+
+// Function to populate Recent Rescues container
+function populateRecentRescues() {
+  const container = document.getElementById('recentRescues');
+  if (!container || !recentRescues || recentRescues.length === 0) {
+    return;
+  }
+  
+  let html = '';
+  
+  recentRescues.forEach(rescue => {
+    html += `
+      <div class="recent-rescue-card">
+        <img src="${rescue.thumbnail}" alt="${rescue.title}" onerror="this.src='https://img.youtube.com/vi/${rescue.url.match(/shorts\/([^?]+)/)[1]}/hqdefault.jpg'">
+        <h4>${rescue.title}</h4>
+        <a href="${rescue.url}" target="_blank" rel="noopener">Watch Rescue</a>
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html;
+}
+
+// Hamburger menu functionality
+function initializeHamburgerMenu() {
+  const hamburger = document.querySelector('.hamburger');
+  const navLinks = document.querySelector('.nav-links');
+  
+  if (hamburger && navLinks) {
+    hamburger.addEventListener('click', function() {
+      navLinks.classList.toggle('active');
+    });
+  }
+}
+
+// Load everything when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  // Small delay to ensure container exists
+  setTimeout(populateRecentRescues, 100);
+  
+  // Initialize hamburger menu
+  initializeHamburgerMenu();
+});
+</script>
+
+<!-- Move the Interests section OUTSIDE of the script tag -->
+<!-- Interests -->
+<section class="interests" style="background-image: url('https://raw.githubusercontent.com/StevenMKay/CareerSolutionsForToday/c3ca55dc6b5ac51414ceca47174ac214708c8e72/photos/HikingSourghdough.jpg');">
+  <h2 class="section-title">Interests</h2>
+  <div class="section-content">
+    I love hiking, nature photography, and discovering new trails across the country. These activities inspire creativity and provide the perfect balance to my professional work.
+  </div>
+</section>
+
+</html>
