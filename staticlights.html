@@ -1,0 +1,307 @@
+html,
+body
+  width 100%
+  height 100%
+  margin 0
+  padding 0
+  overflow hidden
+
+#container
+  width 100%
+  height 100%
+
+
+script#fragment_shader(type='x-shader/x-fragment').
+  precision highp float;
+
+  // Uniforms
+  uniform float time;
+  uniform vec2  mouse;
+  uniform vec2  resolution;
+  uniform bool  mousePosition;
+  uniform float intensity;
+  uniform vec3  color;
+  uniform float offsetX;
+  uniform float offsetY;
+  
+  // Directives
+  #define PI 3.14159265358979323846
+
+  // Constants
+  const int   number   = 10;
+  const float size     = 0.04;
+  const float minSize  = 0.3;
+
+  /**
+   * Rand function
+   * 
+   * @param  {vec2} co Coordinates
+   * @return {float}
+   */
+  float rand(vec2 co) {
+    return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
+  }
+
+  float rand(vec2 co, float l) {
+    return rand(vec2(rand(co), l));
+  }
+
+  float rand(vec2 co, float l, float t) {
+    return rand(vec2(rand(co, l), t));
+  }
+
+  /**
+   * Wrap function
+   * Wrap a value with a minimum boundary
+   * 
+   * @param  {float} x   Value to wrap
+   * @param  {float} min Minimum boundary
+   * @return {float}
+   */
+  float wrap(float x, float min) {
+    return abs(mod(x, 2.0) - 1.0) + min;
+  }
+
+  /**
+   * Particle function
+   * Generate a particule
+   * 
+   * @param  {vec2}  p  Initial position
+   * @param  {float} fx Frequency on X axis
+   * @param  {float} fy Frequency on Y axis
+   * @param  {float} ax Amplitude on X axis
+   * @param  {float} ay Amplitude on Y axis
+   * @return {float}
+   */
+  float particle(vec2 p, float fx, float fy, float ax, float ay) {
+    vec2 r;
+    
+    if(mousePosition)
+      r = vec2(p.x + cos(time * fx) * ax * (mouse.x * offsetX), p.y + sin(time * fy) * ay * (mouse.y * offsetY));
+    else
+      r = vec2(p.x + cos(time * fx) * ax * offsetX, p.y + sin(time * fy) * ay * offsetY);
+      
+    return ( size * wrap( time * ax, minSize ) ) / length(r);
+  }
+
+  /**
+   * Main function
+   * 
+   * @return {void}
+   */
+  void main() {
+    vec2 q = gl_FragCoord.xy / resolution.xy; // Ratio
+    vec2 p = (4.0 * q) - 2.0;                 // Center
+    p.x *= resolution.x / resolution.y;       // Good aspect value
+
+    float col = 0.0;
+    float counter = 0.0;
+    
+    // Create particules
+    for(int i = 0; i < number; i++) {
+      col += particle(p, rand(vec2(counter)), rand(vec2(counter), 1.0, 10.0), counter, counter);
+      counter += 0.1;
+    }
+
+
+                       class Magic {
+  
+  constructor() {
+    console.clear()
+    
+    this.scene
+    this.camera
+    this.renderer
+    this.composer
+    this.glitch
+    this.stats
+    this.gui
+    this.uniforms
+    this.speed         = 0.02
+    this.intensity     = 0.5
+    this.mousePosition = true
+    this.wildGlitch    = false
+    this.color         = [ 137, 188, 222 ]
+    this.offset        = { x: 3, y: 3 }
+    this.mouse         = { x: 0, y: 0 }
+    this.innerWidth    = window.innerWidth
+    this.innerHeight   = window.innerHeight
+    this.container     = document.getElementById( 'canvas' )
+  }
+
+  begin() {
+    this.scene = new THREE.Scene()
+    
+    this.camera = new THREE.PerspectiveCamera( 50, this.innerWidth / this.innerHeight, 0.5, 1000 )
+    this.camera.position.set( 0, 0, 1 )
+
+    this.scene.add( this.camera )
+    
+    this.renderer = new THREE.WebGLRenderer( { antialias: true, preserveDrawingBuffer: true } )
+    this.renderer.domElement.addEventListener( 'mousemove', ::this.onMouseMove, false )
+    this.renderer.setSize( this.innerWidth, this.innerHeight )
+    this.renderer.setPixelRatio( window.devicePixelRatio )
+    this.renderer.setClearColor( 0x000000 )
+    this.renderer.clear()
+    this.container.appendChild( this.renderer.domElement )
+    
+    this.composer = new THREE.EffectComposer( this.renderer )
+    this.composer.addPass( new THREE.RenderPass( this.scene, this.camera ) )
+  
+    this.glitch = new THREE.GlitchPass(64)
+    this.glitch.renderToScreen = true
+    this.glitch.goWild = this.wildGlitch
+    this.composer.addPass( this.glitch )
+
+    window.addEventListener( 'resize', ::this.resize, false )
+
+    this.stats = new Stats()
+    this.stats.domElement.style.position = 'absolute'
+    this.stats.domElement.style.left = '0px'
+    this.stats.domElement.style.top = '0px'
+    document.body.appendChild( this.stats.domElement )
+    
+    this.gui = new dat.GUI()
+    this.gui.close()
+    
+    const general = this.gui.addFolder( 'General' )
+    general.open()
+    general
+      .add( this, 'speed' )
+      .min( 0.01 ).max( 0.2 ).step( 0.01 )
+      .name( 'Speed' )
+    general
+      .add( this, 'intensity' )
+      .min( 0.1 ).max( 1.5 ).step( 0.01 )
+      .name( 'Intensity' )
+      .onChange( (value) => this.uniforms.intensity.value = value )
+    general
+      .add( this, 'wildGlitch' )
+      .name( 'Wild Glitch' )
+      .onChange( (value) => this.glitch.goWild = value )
+    general
+      .add( this, 'mousePosition' )
+      .name( 'Mouse Position' )
+      .onChange( (value) => this.uniforms.mousePosition.value = value )
+    general
+      .addColor( this, 'color' )
+      .name( 'Color' )
+      .onChange( (value) => this.uniforms.color.value = new THREE.Vector3( ...this.rgbToPercentage(value) ) )
+    
+    const offset = this.gui.addFolder( 'Offset' )
+    offset
+      .add( this.offset, 'x', 1, 10, 0.1 )
+      .name( 'X Axis Offset' )
+      .onChange( (value) => this.uniforms.offsetX.value = value )
+     offset
+      .add( this.offset, 'y', 1, 10, 0.1 )
+      .name( 'Y Axis Offset' )
+      .onChange( (value) => this.uniforms.offsetY.value = value )
+
+    this.createMesh()
+    this.animate()
+  }
+  
+  rgbToPercentage(arr) {
+    return arr.map( (value) => value / 255 )
+  }
+  
+  randomInt(min, max) {
+    return (Math.random() * (max - min + 1) ) << 0
+  }
+  
+  easeOutQuad(t) {
+    return t * ( 2 -t )
+  }
+
+  onMouseMove(event) {
+    event.preventDefault()
+
+    this.mouse.x = this.easeOutQuad( ( event.clientX - this.renderer.domElement.width / 2 ) / this.renderer.domElement.width )
+    this.mouse.y =  this.easeOutQuad(- ( event.clientY - this.renderer.domElement.height / 2 ) / this.renderer.domElement.height )
+  }
+  
+  createMesh() {
+    
+    this.uniforms = {
+      time: {
+        type: 'f',
+        value: 0
+      },
+      mouse: {
+        type: 'v2',
+        value: new THREE.Vector2( this.mouse.x, this.mouse.y )
+      },
+      resolution: {
+        type: 'v2',
+        value: new THREE.Vector2( this.innerWidth, this.innerHeight )
+      },
+      intensity: {
+        type: 'f',
+        value: this.intensity
+      },
+      mousePosition: {
+        type: 'i',
+        value: this.mousePosition
+      },
+      color: {
+        type: 'v3',
+        value: new THREE.Vector3( ...this.rgbToPercentage( this.color ) )
+      },
+      offsetX: {
+        type: 'f',
+        value: this.offset.x
+      },
+      offsetY: {
+        type: 'f',
+        value: this.offset.y
+      }
+    }
+    
+    const material = new THREE.ShaderMaterial({
+      uniforms: this.uniforms,
+      fragmentShader: document.getElementById( 'fragment_shader' ).textContent
+    })
+
+    const geometry = new THREE.PlaneGeometry( this.innerWidth, this.innerHeight, 1 )
+    const mesh     = new THREE.Mesh( geometry, material )
+
+    this.scene.add( mesh )
+  }
+
+  resize() {
+    this.innerWidth = window.innerWidth
+    this.innerHeight = window.innerHeight
+
+    this.camera.aspect = this.innerWidth / this.innerHeight
+    this.camera.updateProjectionMatrix()
+    
+    this.uniforms.resolution.value.x = this.innerWidth
+    this.uniforms.resolution.value.y = this.innerHeight
+    
+    this.composer.setSize( this.innerWidth, this.innerHeight )
+    this.renderer.setSize( this.innerWidth, this.innerHeight )
+  }
+  
+  animate() {
+    this.uniforms.time.value        += this.speed
+    this.uniforms.mouse.value.x      = this.mouse.x
+    this.uniforms.mouse.value.y      = this.mouse.y
+
+    this.stats.update()
+    
+    this.render()
+  }
+
+  render() {
+    window.requestAnimationFrame( ::this.animate )
+    this.composer.render()
+  }
+}
+
+let the = ( new Magic() ).begin()
+
+    gl_FragColor.rgb = vec3(col) * color * intensity;
+  }
+
+#canvas
